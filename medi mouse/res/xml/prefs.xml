@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="first_category"
+        android:title="username and password" >
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="user_name"
+            android:summary="user name"
+            android:title="meditech ename" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="user_password"
+            android:password="true"
+            android:summary="password"
+            android:title="meditech password" />
+        
+    </PreferenceCategory>
+    
+    
+    <PreferenceCategory
+        android:key="first_category"
+        android:title="friends" >
+    </PreferenceCategory>
+
+</PreferenceScreen>

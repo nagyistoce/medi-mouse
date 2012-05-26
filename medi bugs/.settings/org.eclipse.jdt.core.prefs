@@ -1,4 +1,24 @@
-#Mon Mar 12 20:35:31 EDT 2012
+</arguments>=
+</buildCommand>=
+</buildSpec>=
+</natures>=
+</projectDescription>=
+</projects>=
+<?xml=version\="1.0" encoding\="UTF-8"?>
+<arguments>=
+<buildCommand>=
+<buildSpec>=
+<comment></comment>=
+<name>com.android.ide.eclipse.adt.ApkBuilder</name>=
+<name>com.android.ide.eclipse.adt.PreCompilerBuilder</name>=
+<name>com.android.ide.eclipse.adt.ResourceManagerBuilder</name>=
+<name>jugs</name>=
+<name>org.eclipse.jdt.core.javabuilder</name>=
+<nature>com.android.ide.eclipse.adt.AndroidNature</nature>=
+<nature>org.eclipse.jdt.core.javanature</nature>=
+<natures>=
+<projectDescription>=
+<projects>=
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
 org.eclipse.jdt.core.compiler.compliance=1.5
