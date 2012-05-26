@@ -175,11 +175,12 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					}
 					me.network_auth=true;
 				} catch (unauthorized e) {
-					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
+					//
 					me.webview="unauthorized, please log in";
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
-					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
+					//
+					//
 				}
 				return me;
 			} else{
