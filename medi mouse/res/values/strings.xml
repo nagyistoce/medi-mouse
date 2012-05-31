@@ -6,6 +6,7 @@
     <string name="crashing">Submitting crash report even if you didn\'t want to...</string>
     <string name="help_about_message">\n
     created by Will Cohen \n
+    source code: https://code.google.com/p/medi-mouse/ \n
     version 1.132 \n
     </string>
     <string name="help_about">About</string>

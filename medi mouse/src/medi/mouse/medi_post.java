@@ -20,6 +20,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
 //import org.apache.commons.codec.binary.Base64;
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -90,6 +91,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}else{
 				System.out.println(1);
 				HttpPost post = new HttpPost(SITE);
+				//fix for Bad Request (Invalid Verb) error
+				post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
 				System.out.println(2);
 				post.setHeader("Content-Type","application/x-www-form-urlencoded");
 				System.out.println(3);
@@ -175,12 +178,11 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					}
 					me.network_auth=true;
 				} catch (unauthorized e) {
-					//
+					
 					me.webview="unauthorized, please log in";
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
-					//
-					//
+					System.out.println("Error: "+e.getMessage());
 				}
 				return me;
 			} else{

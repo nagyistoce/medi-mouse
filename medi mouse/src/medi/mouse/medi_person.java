@@ -87,6 +87,7 @@ public class medi_person {
 		data.put("mystafflink",stafflink);
 		data.put("YYYYMMDDdate", YYYYmmdd);
 		data.put("TYPE","Save");
+		
 		medi_post post = new medi_post(data);
     	
 		post.execute(this);
