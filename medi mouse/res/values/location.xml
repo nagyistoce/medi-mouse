@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<string-array name="in_out">
+        <item name="in">in</item>
+        <item name="out">out</item>
+    </string-array>
+    
     <string-array name="in">
-        <item>In</item>
         <item>At my desk</item>
         <item>In the cafe</item>
         <item>In a meeting</item>
@@ -13,7 +16,6 @@
         <item>Outside</item>
     </string-array>
     <string-array name="bldg">
-        <item>building</item>
         <item>Atlanta</item>
         <item>Canton</item>
         <item>Framingham</item>
@@ -25,7 +27,6 @@
         <item>Working at site</item>
     </string-array>
     <string-array name="out">
-        <item>Out</item>
         <item>Out for the day</item>
         <item>Out Sick</item>
         <item>Out on Vacation</item>

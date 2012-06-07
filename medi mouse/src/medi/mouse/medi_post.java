@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.view.View;
 import android.webkit.WebView;
 //import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	public static String SITE= "https://www.meditech.com/employees/RATweb/RATWeb.mps";
 	public static String SITE2="http://www.meditech.com/employees/RATweb/RATWeb.mps";
+	public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
 	public static String BASE_URL="http://www.meditech.com"; 
 	private Map<String,String> data;
 
@@ -54,7 +56,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	}
 
-	public static String submit(HttpClient client, Map<String, String> data,String method){
+	public static String submit(HttpClient client,Map<String, String> data,
+			String method){
 		return null;
 	}
 	public static void disconnect(HttpClient client){
@@ -67,7 +70,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			String password,
 			Activity context) throws unauthorized {		
 
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(data.size());
+		List<NameValuePair> nameValuePairs = 
+				new ArrayList<NameValuePair>(data.size());
 		Set<String> keys = data.keySet();
 		Iterator<String> keyIter = keys.iterator();
 		String post_data="";
@@ -150,7 +154,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			medi_person me = params[0];
 			//actual fix for issue 1 (the easy way)
 			me.webview="Network Error";
-			System.out.println(params.length);
+			me.network_lock=false;
 			String ret = "";
 			if(this.data.containsKey("TYPE")){
 				try {
@@ -168,13 +172,15 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					}
 					if(!me.network_lock){
 						me.network_lock=true;
-						me.loadauth();
-						ret=doSubmit(me.client,"POST",me.username,me.password,me.context);
+						//me.loadauth();
+						ret=doSubmit(me.client,"POST",me.username,
+								me.password,me.context);
 						if(ret!=null){
+							
 							me.parseresponse(ret,this.data.get("TYPE"));
 						}
 						me.webview=ret;
-						me.network_lock=false;
+						
 					}
 					me.network_auth=true;
 				} catch (unauthorized e) {
@@ -204,7 +210,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 							me.network_lock=true;
 							me.primaryLoad();
 							this.data = me.data;
-							ret=doSubmit(me.client,"POST",me.username,me.password,me.context);
+							ret=doSubmit(me.client,"POST",me.username,
+									me.password,me.context);
 							if(ret!=null){
 								me.parseresponse(ret,this.data.get("TYPE"));
 							}
@@ -215,7 +222,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					}
 
 					if(me.stafflink!=null&&!me.network_lock){
-						SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(me.context);
+						SharedPreferences spref=
+								PreferenceManager.getDefaultSharedPreferences(me.context);
 						spref.edit().putString("stafflink", me.stafflink);
 						spref.edit().commit();
 						System.out.println(":----:"+me.stafflink);
@@ -255,25 +263,38 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		//not implemented 
 		//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
 		WebView web_view = (WebView) context.findViewById(R.id.webview);
-
-		
 		
 		//double fix for issue 1
 		if(me!=null&&me.webview!=null){
 			name_view.setText(me.full_name);
 			status_view.setText(me.status);
 			date_view.setText(me.date);
-			//web_view.loadData(me.webview, "text/html", "");
+			status_view.refreshDrawableState();
+			SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("full_name", me.full_name);
+			editor.putString("status", me.status);
+			editor.putString("date", me.date);
+			editor.putString("stafflink",me.stafflink);
+			editor.putString("imglink",me.imglink);
+			editor.commit();
+			
 			
 			int bad = me.webview.indexOf("<img");
 			int end;
 			while (bad != -1){
 				end = me.webview.indexOf(">", bad);
-				me.webview = me.webview.substring(0, bad)+me.webview.substring(end+1, me.webview.length());
+				me.webview = me.webview.substring(0, bad)+
+						me.webview.substring(end+1, me.webview.length());
 				bad = me.webview.indexOf("<img");
 			}
 			System.out.println("====================>>>\n"+me.webview);
-			web_view.loadDataWithBaseURL(BASE_URL, me.webview, "text/html", "", SITE);
+			web_view.setVisibility(View.VISIBLE);
+			web_view.loadDataWithBaseURL(BASE_URL, me.webview, 
+					"text/html", "", SITE);
+			//web_view.setVisibility(View.INVISIBLE);//set to invisible
+			
 		}
 		super.onPostExecute(me);
 	}

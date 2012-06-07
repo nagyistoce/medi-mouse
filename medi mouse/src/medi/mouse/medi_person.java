@@ -5,12 +5,13 @@ import java.util.Map;
 import org.apache.http.client.HttpClient;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 
 
-public class medi_person {
+public class medi_person extends Activity{
 	//hidden
-	String username,full_name,stafflink,imglink;
+	String username,password,full_name,stafflink,imglink;
 	
 	//postable
 	String status,date,out,in,loc,bldg,YYYYmmdd;
@@ -32,29 +33,70 @@ public class medi_person {
 	public Map<String, String> data = new HashMap<String, String>();
 	
 	HttpClient client;
-
-	
-	String password;
-
+ 
 	public String webview;
-	public void loadauth(){
-		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(context);
-        password = spref.getString("user_password","");
-	}
+
+	public String filelink;
+
+	public String imgfile;
 	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        
+        setContentView(R.layout.main);
+	}
 	public medi_person(MedibugsActivity context){
+        this.context=context;
+
+        
+        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(context);
+        full_name = spref.getString("full_name", "");
+    	status = spref.getString("status", "");
+    	date = spref.getString("date", "");
+    	
+        
+        
+        username = spref.getString("user_name", "");
+    	stafflink = spref.getString("stafflink", "");
+    	imglink = spref.getString("imglink", "");
+    	full_name = spref.getString("full_name", "");
+    	status = spref.getString("status", "");
+    	date = spref.getString("date", "");
+    	imgfile = spref.getString("imgfile", "");
+    	
+		client = context.client;
+        data = new HashMap<String, String>();
+        
+        //get current status
+        medi_post post = new medi_post(data);
+    	post.execute(this);
+    
+	    		
+	}
+	/**
+	 * medi_person
+	 * @param context
+	 * @param message
+	 * doesn't do initial load, stafflink and current 
+	 * status should have already been found
+	 */
+	public medi_person(EditStatus context,int message){
         this.context=context;
 
         
         SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(context);
         username = spref.getString("user_name", "");
     	stafflink = spref.getString("stafflink", "");
+    	imglink = spref.getString("imglink", "");
+    	full_name = spref.getString("full_name", "");
+    	status = spref.getString("status", "");
+    	date = spref.getString("date", "");
+    	imgfile = spref.getString("imgfile", "");
     	
 		client = context.client;
-        data = new HashMap<String, String>();
-    	medi_post post = new medi_post(data);
-    	post.execute(this);
-	    		
+        data = new HashMap<String, String>();	    		
 	}
 	
 	public void secondaryLoad(){
@@ -74,7 +116,16 @@ public class medi_person {
 		return stafflink!=null&&(stafflink.length()>9);
 	}
 	public void submit(Activity context){
-	    
+		SharedPreferences spref=
+				PreferenceManager.getDefaultSharedPreferences(context);
+		SharedPreferences.Editor editor = spref.edit();
+		editor.putString("full_name", full_name);
+		editor.putString("status", status);
+		editor.putString("date", date);
+		editor.putString("stafflink",stafflink);
+		editor.putString("imglink",imglink);
+		editor.commit();
+		
         data = new HashMap<String, String>();
 		//actual important stuff
 		data.put("loc", loc);
@@ -92,6 +143,7 @@ public class medi_person {
     	
 		post.execute(this);
 	}
+	
 	public static String parse(String htmlobject, String pre,String post){
 		
 		if (htmlobject!=null){
@@ -113,9 +165,13 @@ public class medi_person {
 		if(output.length()>0){
 			if(type=="ViewUser"){
 				full_name = parse(output, "<td valign=middle align=center>","<br>");
-				imglink = "Photos\\"+medi_person.parse(output,"Photos\\","\"");
+				imglink = "Photos/"+medi_person.parse(output,"Photos\\","\"");
+			} else if (type=="Save"){
+				
 			}
-			if (stafflink.length()==0||stafflink==null||stafflink=="stafflink"){
+			if (stafflink==null||
+					stafflink.length()==0||
+					stafflink=="stafflink"){
 				String stafflink;
 				stafflink = medi_person.parse(output, "stafflink = 'stafflink\\","';");
 				int bad = stafflink.indexOf("\\",1);
@@ -135,5 +191,13 @@ public class medi_person {
 			
 			System.out.println("full name: "+full_name);
 		}
+	}
+	public void loadauth() {
+		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
+    	
+    	username = spref.getString("user_name", "");
+    	password = spref.getString("user_password","");
+    	
+		
 	}
 }

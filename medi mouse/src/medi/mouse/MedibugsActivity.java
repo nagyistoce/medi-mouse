@@ -1,16 +1,23 @@
 package medi.mouse;
 
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -19,18 +26,29 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.view.animation.TranslateAnimation;
+import android.view.ViewGroup;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.Gallery;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import medi.mouse.EditStatus.menu_node;
 
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -41,75 +59,24 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
 	TextView status_view;
 	TextView date_view;
 	ImageView picture;
+	String status_message="";
 	
-	Spinner in_spinner,out_spinner,bldg_spinner,date_spinner;
-	
-	ArrayList<myDate> inputDates;
 	medi_person me;
 	public DefaultHttpClient client;
+	
+	
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	
+        
         super.onCreate(savedInstanceState);
-        
-        setContentView(R.layout.main);
-        
-        WebView webview = (WebView) findViewById(R.id.webview);
-        webview.getSettings().setJavaScriptEnabled(true);
-        webview.setWebViewClient(new MyWebViewClient (this));
-        //webview.loadUrl(medi_post.SITE);
-        //build some layout spinners
-        ArrayAdapter<CharSequence> in_adapter = ArrayAdapter.createFromResource(
-        		this, R.array.in, android.R.layout.simple_spinner_item );
-        in_adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
-        in_spinner = (Spinner) findViewById( R.id.in_edit );
-        in_spinner.setAdapter( in_adapter );
-        in_spinner.setOnItemSelectedListener(new in_spin_listener());
-        
-        ArrayAdapter<CharSequence> bldg_adapter = ArrayAdapter.createFromResource(
-                this, R.array.bldg, android.R.layout.simple_spinner_item );
-        bldg_adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
-        bldg_spinner = (Spinner) findViewById( R.id.building_edit );
-        bldg_spinner.setAdapter( bldg_adapter );
-        bldg_spinner.getSelectedItem();
-        
-        bldg_spinner.setOnItemSelectedListener(new in_spin_listener());
-        ArrayAdapter<CharSequence> out_adapter = ArrayAdapter.createFromResource(
-        		this, R.array.out, android.R.layout.simple_spinner_item );
-        out_adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
-        out_spinner = (Spinner) findViewById( R.id.out_edit );
-        out_spinner.setAdapter( out_adapter );
-        
-        out_spinner.setOnItemSelectedListener(new out_spin_listener());
-        
-        // setup display info about the current user
-        name_view = (TextView) findViewById(R.id.name_view);
-        status_view = (TextView) findViewById(R.id.status_view);
-        date_view = (TextView) findViewById(R.id.date_view);
-        picture = (ImageView) findViewById(R.id.picture_view);
+        setContentView(R.layout.set_status);
+                
         
         
         //the date spinners
-        
-        ArrayAdapter<CharSequence> date_adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item);
-        
-        inputDates = new ArrayList<myDate>();
-        Calendar cal = Calendar.getInstance();
-        for(int x = 0; x<7;x++){
-        	inputDates.add(x, new myDate(cal));
-        	date_adapter.add(inputDates.get(x).human);
-            cal.add(Calendar.DATE,1);
-        }
-        date_spinner = (Spinner) findViewById(R.id.date_edit);
-        date_spinner.setAdapter(date_adapter);
-       
-        //submit button
-        Button submit = (Button) findViewById(R.id.submit);
-        Button refresh = (Button) findViewById(R.id.refresh);
-        
-        submit.setOnClickListener(new submit_listener());
-        refresh.setOnClickListener(new refresh_listener());
         //------------------------------------------------------------------------------------------
         //establish connection to server
         
@@ -118,151 +85,97 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
+    	
+    	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
-    	
-    	name_view = (TextView) findViewById(R.id.name_view);
-        status_view = (TextView) findViewById(R.id.status_view);
-        date_view = (TextView) findViewById(R.id.date_view);
-        picture = (ImageView) findViewById(R.id.picture_view);
+    	reload(1);
+    	ListView lv = (ListView) findViewById(R.id.list_view);
         
-    	name_view.setText(me.full_name);
-    	status_view.setText(me.status);
-    	date_view.setText(me.date);
+        lv.requestLayout();
+        String[] options = {"Sign In/Out","Refresh"};
+        lv.setAdapter(new ArrayAdapter<String>(this, 
+        			R.layout.list_item, options));
+        lv.setOnItemClickListener(new OnItemClickListener(){
+
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if(MedibugsActivity.this.me.hasStafflink()){
+					if(arg2==0){
+						//sign in/out
+						startActivity(new Intent(MedibugsActivity.this, EditStatus.class));
+					}else if (arg2==1){
+						//refresh
+						MedibugsActivity.this.reload();
+					}
+				}else {
+					Toast.makeText(MedibugsActivity.this, "Please wait for initial load to complete", 
+							Toast.LENGTH_SHORT).show();
+				}
+					
+			}});
+
     	
-        
+    	/*
+    	picture.setOnClickListener(new picture_listener());
+    	File imageFile = new File(me.imgfile);
+    	
+    	System.out.println("imgfile: "+me.imgfile);
+		if(imageFile.exists()){
+			
+			System.out.println("displaying picture");
+			//Bitmap myBitmap = BitmapFactory.decodeFile(me.imgfile);
+			
+			//picture.setImageBitmap(myBitmap);
+		}
+		*/
+    	
     }
-    
+        
     @Override
     public void onDestroy(){
     	//disconnect
-    	medi_post.disconnect(client);
+    	//medi_post.disconnect(client);
     	super.onDestroy();
     }
-    public class myDate{
-    	Calendar date;
-    	String human;
-    	String YYYYmmdd;
-    	public myDate(Calendar date){
-    		this.date = date;
-    		human = this.toString();
-    		YYYYmmdd = this.toString(1);
-    	}
-    	
-    	public String toString(){
-    		int day = date.get(Calendar.DAY_OF_WEEK);
-        	String day_of_week="";
-        	switch(day){
-        		case Calendar.SUNDAY:
-        			day_of_week="Sun";
-        			break;
-        		case Calendar.MONDAY:
-        			day_of_week="Mon";
-        			break;
-        		case Calendar.TUESDAY:
-        			day_of_week="Tue";
-        			break;
-        		case Calendar.WEDNESDAY:
-        			day_of_week="Wed";
-        			break;
-        		case Calendar.THURSDAY:
-        			day_of_week="Thu";
-        			break;
-        		case Calendar.FRIDAY:
-        			day_of_week="Fri";
-        			break;
-        		case Calendar.SATURDAY:
-        			day_of_week="Sat";
-        			break;
-        	}
-        	day =  date.get(Calendar.MONTH);
-        	String month="";
-        	String mm="";
-        	switch(day){
-        		case Calendar.JANUARY:
-        			month="Jan";
-        			mm="01";
-        			break;
-        		case Calendar.FEBRUARY:
-        			month="Feb";
-        			mm="02";
-        			break;
-        		case Calendar.MARCH:
-        			month="Mar";
-        			mm="03";
-        			break;
-        		case Calendar.APRIL:
-        			month="Apr";
-        			mm="04";
-        			break;
-        		case Calendar.MAY:
-        			month="May";
-        			mm="05";
-        			break;
-        		case Calendar.JUNE:
-        			month="Jun";
-        			mm="06";
-        			break;
-        		case Calendar.JULY:
-        			month="Jul";
-        			mm="07";
-        			break;
-        		case Calendar.AUGUST:
-        			month="Aug";
-        			mm="08";
-        			break;
-        		case Calendar.SEPTEMBER:
-        			month="Sep";
-        			mm="09";
-        			break;
-        		case Calendar.OCTOBER:
-        			month="Oct";
-        			mm="10";
-        			break;
-        		case Calendar.NOVEMBER:
-        			month="Nov";
-        			mm="11";
-        			break;
-        		case Calendar.DECEMBER:
-        			month="Dec";
-        			mm="12";
-        			break;
-        	}
-        	
-        	
-        	int day_of_month = date.get(Calendar.DAY_OF_MONTH);
-        	String yyyy = date.get(Calendar.YEAR)+"";
-        	
-        	String dd = day_of_month+"";
-        	if(dd.length()==1){
-        		dd="0"+dd;
-        	}
-        	this.YYYYmmdd=yyyy+mm+dd;
-        	System.out.println(yyyy+mm+dd);
-        	return month+" "+day_of_month+" "+day_of_week;
-
-    	}
-    	public String toString(int cmp){
-    		this.toString();
-    		return this.YYYYmmdd;
-    		
-    	}
-    }
-    class refresh_listener implements OnClickListener{
+    /**
+     * picture_listener
+     * @author will
+     * Does not work!  There is something wrong with meditech's webserver
+     * and my download requests are not working.  I kept getting file not
+     * found exceptions or html files instead of the jpg I requested.  
+     * 
+     * I tested with another remote jpg file and it pulled in just fine,
+     * so thats why I think its a problem with the server.
+     */
+    class picture_listener implements OnClickListener{
 
 		public void onClick(View arg0) {
-			System.out.println(":::here:::");
-
-	    	reload();
-	    	
-			
+			if(me.imglink!=null){
+				/*
+				String filelink = me.username+".jpg";
+				ImageManager.DownloadFromUrl(medi_post.SITE_IMG_DIR+"/"+me.imglink,filelink);
+				SharedPreferences spref=
+						PreferenceManager.getDefaultSharedPreferences(me.context);
+				SharedPreferences.Editor editor = spref.edit();
+				editor.putString("imgfile", "/sdcard/data/medi.mouse/"+filelink);
+				editor.commit();
+				File imageFile = new File(filelink);
+				if(imageFile.exists()){
+					Bitmap myBitmap = BitmapFactory.decodeFile("/sdcard/data/medi.mouse/"+filelink);
+					ImageView myImage = (ImageView) findViewById(R.id.picture_view);
+					myImage.setImageBitmap(myBitmap);
+				}
+				*/
+			}
 		}
     	
     }
-	public void reload(){
+
+    public void reload(){
 		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
     	
 		String username = spref.getString("user_name", "");
@@ -288,6 +201,31 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
 	    	postme.execute(me);
     	}
 	}
+    @Override
+    public void onResume(){
+    	super.onResume();
+    	reload(1);
+    }
+    public void reload(int t){
+    	//just refresh screen
+    	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
+        me.full_name = spref.getString("full_name", "");
+        me.status = spref.getString("status", "");
+        me.date = spref.getString("date", "");
+    	
+    	name_view = (TextView) findViewById(R.id.name_view);
+        status_view = (TextView) findViewById(R.id.status_view);
+        date_view = (TextView) findViewById(R.id.date_view);
+        picture = (ImageView) findViewById(R.id.picture_view);
+        
+    	name_view.setText(me.full_name);
+    	status_view.setText(me.status);
+    	date_view.setText(me.date);
+    	
+    	status_view.refreshDrawableState();
+    	
+    }    	
+/*
     class submit_listener implements OnClickListener{
 
 		public void onClick(View arg0) {
@@ -330,7 +268,7 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
 		}
     	
     }
-    
+  */  
 	private class MyWebViewClient extends WebViewClient {
     	Activity activity;
     	public MyWebViewClient(Activity activity){
@@ -365,42 +303,7 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
      }
 
     }
-    class in_spin_listener implements AdapterView.OnItemSelectedListener{
-		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-				long arg3) {
-			if(arg2!=0){
-				out_spinner.setSelection(0, true);
-				out_spinner.setSelected(false);
-				
-			}
-			
-		}
-
-		public void onNothingSelected(AdapterView<?> arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-    	
-    }
-    class out_spin_listener implements AdapterView.OnItemSelectedListener{
-		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-				long arg3) {
-			if(arg2!=0){
-				in_spinner.setSelection(0, true);
-				in_spinner.setSelected(false);
-				bldg_spinner.setSelection(0, true);
-				bldg_spinner.setSelected(false);
-				
-			}
-		}
-
-		public void onNothingSelected(AdapterView<?> arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-    	
-    }
-    @Override
+        @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE, 0, 0, "login");
         menu.add(Menu.NONE, 1, 1, "about");
