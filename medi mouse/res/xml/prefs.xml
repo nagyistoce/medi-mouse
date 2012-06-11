@@ -15,13 +15,13 @@
             android:password="true"
             android:summary="password"
             android:title="meditech password" />
+         <CheckBoxPreference
+        android:key="reload_onresume"
+        android:title="Refresh on resume"
+        android:defaultValue="true"/>
         
     </PreferenceCategory>
     
     
-    <PreferenceCategory
-        android:key="first_category"
-        android:title="friends" >
-    </PreferenceCategory>
 
 </PreferenceScreen>

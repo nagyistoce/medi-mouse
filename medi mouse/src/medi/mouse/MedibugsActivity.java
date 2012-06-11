@@ -204,7 +204,20 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     @Override
     public void onResume(){
     	super.onResume();
-    	reload(1);
+
+    	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
+    	
+    	boolean doreload = spref.getBoolean("reload_onresume", true);
+    	if (doreload){
+    		System.out.println("full reload");
+    		reload();
+    	}else{
+    		System.out.println("partial reload");
+	    	reload(1);
+	    	//set to invisible to avoid a full reload
+	    	WebView web_view = (WebView) this.findViewById(R.id.webview);
+	    	web_view.setVisibility(View.INVISIBLE);
+    	}
     }
     public void reload(int t){
     	//just refresh screen
@@ -305,7 +318,7 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     }
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, 0, 0, "login");
+        menu.add(Menu.NONE, 0, 0, "settings");
         menu.add(Menu.NONE, 1, 1, "about");
         return super.onCreateOptionsMenu(menu);
     }
@@ -334,24 +347,34 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
         return false;
     }
 
-	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {    	
-		String username = spref.getString(arg1, "");
-		String value = "user_password";
-    	
-    	char[] t = arg1.toCharArray();
-    	
-    	boolean equals = arg1.length()== value.length();
+	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
+		String value = "reload_onresume";
+		boolean equals = arg1.length()== value.length();
     	int len = arg1.length();
-    	//not sure why this is false
-    	//System.out.println(arg1+"==user_name? "+(arg1==value));
     	for (int x=0; x<len&&equals;x++){
     		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
     	}
-    	
-		if(equals){
-			//password has been updated
-			//refresh
-			reload();
+    	if(!equals){
+			
+			System.out.println(arg1);
+			String username = spref.getString(arg1, "");
+			value = "user_password";
+	    	
+	    	char[] t = arg1.toCharArray();
+	    	
+	    	equals = arg1.length()== value.length();
+	    	len = arg1.length();
+	    	//not sure why this is false
+	    	//System.out.println(arg1+"==user_name? "+(arg1==value));
+	    	for (int x=0; x<len&&equals;x++){
+	    		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
+	    	}
+	    	
+			if(equals){
+				//password has been updated
+				//refresh
+				reload();
+			}
 		}
 	}
     
