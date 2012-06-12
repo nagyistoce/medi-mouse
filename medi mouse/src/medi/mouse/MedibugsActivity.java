@@ -85,14 +85,19 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	
+    	boolean reload = spref.getBoolean("reload_onresume", false);
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
-    	reload(1);
+    	if (reload){
+    		//onResume handles full reloads
+    		reload();
+    	}else{
+    		reload(1);
+    	}
     	ListView lv = (ListView) findViewById(R.id.list_view);
         
         lv.requestLayout();
@@ -316,6 +321,11 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
      }
 
     }
+	/**
+	 * create options menu
+	 * 
+	 * 
+	 */
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE, 0, 0, "settings");
