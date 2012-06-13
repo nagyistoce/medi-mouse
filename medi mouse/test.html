@@ -1,0 +1,105 @@
+<html><head></head>
+<head>
+<style>
+body {
+	margin: 0px;
+padding: 0px;
+}
+#myCanvas {
+	border: 1px solid #9C9898;
+}
+</style>
+<script>
+window.onresize = function(){
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+}
+window.onload = function() {
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	var x = 80;
+	var y = 110;
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	var angle = 0;
+	function convertToRadians(degree) {
+		return degree*(Math.PI/180);
+	}
+
+	function incrementAngle() {
+		angle++;
+		if(angle > 360) {
+			angle = 0;
+		}
+	}
+	function curvedRectPath(h, w, radius, slices, image){
+		context.font = "22pt Courier New";
+		context.lineWidth = 2;
+		// stroke color
+		context.strokeStyle = "blue";
+		
+		
+		//phase 1:
+		var x = 0;
+		var slicesize = h/slices;
+		phase_1_iter(h,0,slizesize,slices,image);
+	
+		function phase_1_iter(){
+			context.clearRect(0,0,height,width);
+			context.save();
+			context.translate(0,slice_num*slicesize);
+			//display
+			context.translate(200,200);
+			context.strokeText(image+slice_num, 0, 0);
+			slice_num+=1;
+			context.translate(200,200);
+			context.restore();
+			setTimeout("phase_1_iter()",1000);
+		}
+	}
+	
+	function drawRandomlyColoredRectangle() {  
+		<!-- clear the drawing surface -->
+		context.clearRect(0,0,height,width);
+		<!-- you can also stroke a rect, the operations need to happen in order -->
+		incrementAngle();
+		context.save();                
+		
+		context.rotate(convertToRadians(angle));
+		context.translate(51,50);
+		context.rotate(convertToRadians(-angle));
+		context.translate(height/2,width/2);
+		
+		
+		
+		<!-- 
+		context.lineWidth = 1; 
+		context.font = "22pt Courier New";
+		context.lineWidth = 2;
+		// stroke color
+		context.strokeStyle = "blue";
+		context.strokeText("W", 0, 0);
+		context.strokeText("I", 20, 0);
+		-->
+		//context.strokeText('Hello World!', x, y);
+
+
+		<!-- set the fill style -->
+		context.restore();
+	}
+
+	curvedRectPath(10,200,10,60,"w");
+	//setInterval(drawRandomlyColoredRectangle, 20);
+}
+</script>
+</head>
+
+<body>
+<canvas id="myCanvas" width="100%" height="100%"></canvas>
+</body>
+</html>
+</html>
