@@ -31,6 +31,7 @@ import android.webkit.WebView;
 //import android.widget.ImageView;
 import android.widget.TextView;
 
+
 public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	public static String SITE= "https://www.meditech.com/employees/RATweb/RATWeb.mps";
