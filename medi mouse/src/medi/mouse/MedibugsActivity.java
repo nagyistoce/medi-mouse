@@ -94,9 +94,9 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	me = new medi_person(this);
     	if (reload){
     		//onResume handles full reloads
-    		reload();
-    	}else{
     		reload(1);
+    	}else{
+    		reload();
     	}
     	ListView lv = (ListView) findViewById(R.id.list_view);
         
