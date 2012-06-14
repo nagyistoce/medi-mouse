@@ -181,6 +181,8 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     }
 
     public void reload(){
+    	
+    	
 		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
     	
 		String username = spref.getString("user_name", "");
