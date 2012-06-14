@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.animation.TranslateAnimation;
 import android.view.ViewGroup;
 import android.webkit.HttpAuthHandler;
@@ -72,6 +73,8 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
         
         super.onCreate(savedInstanceState);
+        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.set_status);
                 
         
@@ -101,7 +104,9 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	ListView lv = (ListView) findViewById(R.id.list_view);
         
         lv.requestLayout();
-        String[] options = {"Sign In/Out","Refresh"};
+        String[] options = {"Sign In/Out",
+        		"Find Person",
+        		"Refresh"};
         lv.setAdapter(new ArrayAdapter<String>(this, 
         			R.layout.list_item, options));
         lv.setOnItemClickListener(new OnItemClickListener(){
@@ -109,13 +114,22 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 				if(MedibugsActivity.this.me.hasStafflink()){
-					if(arg2==0){
-						//sign in/out
+					
+					switch (arg2) {
+					case 0:
+						//Sign In/Out
 						startActivity(new Intent(MedibugsActivity.this, EditStatus.class));
-					}else if (arg2==1){
-						//refresh
+						break;
+					case 1:
+						//Find Person
+						MedibugsActivity.this.getLookup();
+						startActivity(new Intent(MedibugsActivity.this, FindPerson.class));
+						break;
+					case 2:
+						//Refresh
 						MedibugsActivity.this.reload();
 					}
+					
 				}else {
 					Toast.makeText(MedibugsActivity.this, "Please wait for initial load to complete", 
 							Toast.LENGTH_SHORT).show();
@@ -140,7 +154,12 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
     }
         
-    @Override
+    protected void getLookup() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
     public void onDestroy(){
     	//disconnect
     	//medi_post.disconnect(client);
@@ -181,9 +200,7 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     }
 
     public void reload(){
-    	
-    	
-		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
+    	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
     	
 		String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");

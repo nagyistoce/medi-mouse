@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.TranslateAnimation;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -35,7 +36,7 @@ public class EditStatus extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 			
 	        super.onCreate(savedInstanceState);
-	        
+	        requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        setContentView(R.layout.set_status);   
 	        String username,stafflink,full_name,status,mydate;
 	        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
@@ -89,8 +90,6 @@ public class EditStatus extends Activity {
 	        
 	        //--------------------------------------------------------------
 	        //setup network stuff
-	    	
-	    	
 	    	String password = spref.getString("user_password","");
 	    	
 	        client = medi_post.connect(username, password);
