@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -339,19 +340,22 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
                 startActivity(new Intent(this, EditPreferences.class));
                 return true;
             case 1:
-            	new AlertDialog.Builder(this)
-            	  .setTitle(R.string.help_about).setMessage(R.string.help_about_message)
-            	  .setPositiveButton(R.string.OK,
-            	   new DialogInterface.OnClickListener() {
+                LayoutInflater inflater = LayoutInflater.from(MedibugsActivity.this);
 
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						
-					}
-            	    
-            	   }
-            	    )
-            	  .show();
+                // error here
+                View alertDialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
+
+                WebView myWebView = (WebView) alertDialogView.findViewById(R.id.DialogWebView);
+                
+                myWebView.loadUrl("file:///android_asset/help_about.html");  
+                AlertDialog.Builder builder = new AlertDialog.Builder(MedibugsActivity.this);
+                builder.setView(alertDialogView);
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }).show();
             	return true;
         }
         return false;

@@ -18,11 +18,11 @@ public class medi_person extends Activity{
 
 	//this could be big
 	String text;
-	
+
 	//ui stuff
 	Activity context;
 	public String humanDate;
-	
+
 	boolean network_lock = false;
 	boolean network_auth = false;
 	
@@ -30,14 +30,11 @@ public class medi_person extends Activity{
 	 * im not sure if i can throw more then one object through
 	 * the AsyncTask gateway so im internalizing everything ill need.
 	 */
+
 	public Map<String, String> data = new HashMap<String, String>();
-	
 	HttpClient client;
- 
 	public String webview;
-
 	public String filelink;
-
 	public String imgfile;
 	
 	@Override
