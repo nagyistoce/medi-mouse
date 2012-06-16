@@ -67,8 +67,8 @@ public class medi_person extends Activity{
         data = new HashMap<String, String>();
         
         //get current status
-        medi_post post = new medi_post(data);
-    	post.execute(this);
+        //medi_post post = new medi_post(data);
+    	//post.execute(this);
     
 	    		
 	}
