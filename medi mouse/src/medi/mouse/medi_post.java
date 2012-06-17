@@ -94,17 +94,12 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 				HttpGet get = new HttpGet(url);
 				response = httpclient.execute(get);
 			}else{
-				System.out.println(1);
 				HttpPost post = new HttpPost(SITE);
 				//fix for Bad Request (Invalid Verb) error
 				post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-				System.out.println(2);
 				post.setHeader("Content-Type","application/x-www-form-urlencoded");
-				System.out.println(3);
 				post.setEntity(new  UrlEncodedFormEntity(nameValuePairs));
-				System.out.println(4);
 				response = httpclient.execute(post);
-				System.out.println(5);
 				
 			}
 
@@ -158,6 +153,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			me.network_lock=false;
 			String ret = "";
 			if(this.data.containsKey("TYPE")){
+				
 				try {
 					int t = 0;
 					int MAX = 100;
