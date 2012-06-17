@@ -26,12 +26,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class EditStatus extends Activity {
+public class EditStatus extends medi_mouse_activity {
 	static int TRANS_START=800;
 	static int TRANS_DUR=500;
 	menu_node root,current;
-	medi_person me;
-	public DefaultHttpClient client;
 	ArrayList<myDate> inputDates;
 	public void onCreate(Bundle savedInstanceState) {
 			
@@ -94,7 +92,7 @@ public class EditStatus extends Activity {
 	    	
 	        client = medi_post.connect(username, password);
 	        me = new medi_person(this,1);
-	        root = new menu_node(options,root_futures);
+	        root = new menu_node(options, root_futures);
 	        
 	        root.display(new ArrayList<String>(),new ArrayList<Integer>());
 	        

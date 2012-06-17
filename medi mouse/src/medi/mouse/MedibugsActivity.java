@@ -54,16 +54,13 @@ import medi.mouse.EditStatus.menu_node;
 import org.apache.http.impl.client.DefaultHttpClient;
 
  
-public class MedibugsActivity extends Activity implements OnSharedPreferenceChangeListener{
+public class MedibugsActivity extends medi_mouse_activity implements OnSharedPreferenceChangeListener{
 
 	TextView name_view;
 	TextView status_view;
 	TextView date_view;
 	ImageView picture;
 	String status_message="";
-	
-	medi_person me;
-	public DefaultHttpClient client;
 	
 	
 	

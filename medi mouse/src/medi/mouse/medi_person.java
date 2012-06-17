@@ -12,7 +12,7 @@ import android.preference.PreferenceManager;
 public class medi_person extends Activity{
 	//hidden
 	String username,password,full_name,stafflink,imglink;
-	
+	HashMap<String,String> found_people;
 	//postable
 	String status,date,out,in,loc,bldg,YYYYmmdd;
 
@@ -47,7 +47,7 @@ public class medi_person extends Activity{
         
         setContentView(R.layout.main);
 	}
-	public medi_person(MedibugsActivity context){
+	public medi_person(medi_mouse_activity context){
         this.context=context;
 
         
@@ -70,8 +70,8 @@ public class medi_person extends Activity{
         data = new HashMap<String, String>();
         
         //get current status
-        medi_post post = new medi_post(data);
-    	post.execute(this);
+        //medi_post post = new medi_post(data);
+    	//post.execute(this);
     
 	    		
 	}
@@ -82,7 +82,7 @@ public class medi_person extends Activity{
 	 * doesn't do initial load, stafflink and current 
 	 * status should have already been found
 	 */
-	public medi_person(EditStatus context,int message){
+	public medi_person(medi_mouse_activity context,int message){
         this.context=context;
 
         
@@ -160,7 +160,14 @@ public class medi_person extends Activity{
 		}		return "";
 		
 	}
-
+	private String fix_stafflink(String stafflink) {
+		int bad = stafflink.indexOf("\\",1);
+		while (bad != -1){
+			stafflink = stafflink.substring(0, bad)+ stafflink.substring(bad+1, stafflink.length());;
+			bad = stafflink.indexOf("\\",1);
+		}
+		return stafflink;
+	}
 	public void parseresponse(String output, String type) {
 		if(output.length()>0){
 			if(type=="ViewUser"){
@@ -168,26 +175,47 @@ public class medi_person extends Activity{
 				imglink = "Photos/"+medi_person.parse(output,"Photos\\","\"");
 			} else if (type=="Save"){
 				
+			} else if (type=="Lookup") {
+				found_people = new HashMap<String, String>();
+				String SLpre = "<a href=\"javascript:parent.changeUser('";
+				String SLpost = "');\"";
+				String Npre = ">";
+				String Npost = "</a>";
+				int index = output.indexOf(SLpre, 0);
+				int end;
+				String name,stafflink;
+				while (index!=-1) {
+					end = output.indexOf(SLpost, index);
+					stafflink = output.substring(index+SLpre.length(), end);
+					stafflink = fix_stafflink(stafflink);
+					
+					index = output.indexOf(Npre,end);
+					end = output.indexOf(Npost, index);
+					
+					name = output.substring(index+SLpre.length(), end);
+					
+					found_people.put(name, stafflink);
+					index = output.indexOf(SLpre,end);
+				}
+			} else if(type=="TraxView") {
+				date = medi_person.parse(output, "date = '","';");
+				out = medi_person.parse(output, "out = '","';");
+				loc = medi_person.parse(output, "loc = '","';");
+				bldg = medi_person.parse(output, "bldg = '","';");
+				status = loc.length()>0?loc+", "+bldg:out;
 			}
 			if (stafflink==null||
 					stafflink.length()==0||
 					stafflink=="stafflink"){
 				String stafflink;
 				stafflink = medi_person.parse(output, "stafflink = 'stafflink\\","';");
-				int bad = stafflink.indexOf("\\",1);
-				while (bad != -1){
-					stafflink = stafflink.substring(0, bad)+ stafflink.substring(bad+1, stafflink.length());;
-					bad = stafflink.indexOf("\\",1);
-				}
+				stafflink = fix_stafflink(stafflink);
 
 				System.out.println(stafflink);
 				this.stafflink = "stafflink"+stafflink;
-			} 
-			date = medi_person.parse(output, "date = '","';");
-			out = medi_person.parse(output, "out = '","';");
-			loc = medi_person.parse(output, "loc = '","';");
-			bldg = medi_person.parse(output, "bldg = '","';");
-			status = loc.length()>0?loc+", "+bldg:out;
+			}
+			
+			
 			
 			System.out.println("full name: "+full_name);
 		}
