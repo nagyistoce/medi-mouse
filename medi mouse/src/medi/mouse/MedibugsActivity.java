@@ -1,57 +1,34 @@
 package medi.mouse;
 
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.animation.TranslateAnimation;
-import android.view.ViewGroup;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.Gallery;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import medi.mouse.EditStatus.menu_node;
-
-import org.apache.http.impl.client.DefaultHttpClient;
 
  
 public class MedibugsActivity extends medi_mouse_activity implements OnSharedPreferenceChangeListener{
@@ -119,7 +96,6 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 						break;
 					case 1:
 						//Find Person
-						MedibugsActivity.this.getLookup();
 						startActivity(new Intent(MedibugsActivity.this, FindPerson.class));
 						break;
 					case 2:
@@ -151,11 +127,6 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     }
         
-    protected void getLookup() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	@Override
     public void onDestroy(){
     	//disconnect
@@ -212,6 +183,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	if (!me.hasStafflink()||
     			me.username!=username||
     			!me.network_auth){
+    		me.stafflink=null;
     		me.username=username;
     		me.data = new HashMap<String, String>();
     		postme = new medi_post(me.data);
@@ -257,52 +229,16 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	date_view.setText(me.date);
     	
     	status_view.refreshDrawableState();
+
+    	//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
     	
+		WebView web_view = (WebView) findViewById(R.id.webview);
+		web_view.setVisibility(View.VISIBLE);
+		web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
+				"text/html", "", medi_post.SITE);
+		
+		
     }    	
-/*
-    class submit_listener implements OnClickListener{
-
-		public void onClick(View arg0) {
-			boolean post = false;
-			if(out_spinner.getSelectedItemPosition()!=0){
-				
-				me.out=(String) out_spinner.getSelectedItem();
-				me.loc=me.bldg=me.in="";
-				myDate date = inputDates.get(date_spinner.getSelectedItemPosition());
-
-				me.date = date.human;
-				me.YYYYmmdd = date.YYYYmmdd;
-				post = true;
-				System.out.println("-->out"+me.out);
-			} else if (in_spinner.getSelectedItemPosition()!=0&&bldg_spinner.getSelectedItemPosition()!=0){
-				
-				
-				me.bldg = (String) bldg_spinner.getSelectedItem();
-				me.loc = me.in = (String) in_spinner.getSelectedItem();
-				me.out="";
-				
-				post = true;
-				System.out.println("-->in"+me.loc);
-				System.out.println("-->in"+me.bldg);
-			}
-			System.out.println("in: "+in_spinner.getSelectedItemPosition());
-			System.out.println("out: "+out_spinner.getSelectedItemPosition());
-			System.out.println("post: "+post);
-			if (post){
-				
-				me.submit(MedibugsActivity.this);
-				
-			}	
-			//me.secondaryLoad();
-			//medi_post postme = new medi_post(me.data);
-	    	//postme.execute(me);
-	    	
-	    	
-			
-		}
-    	
-    }
-  */  
 	private class MyWebViewClient extends WebViewClient {
     	Activity activity;
     	public MyWebViewClient(Activity activity){
@@ -402,6 +338,33 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 				reload();
 			}
 		}
+	}
+
+	@Override
+	public void onPostExecute(medi_person result) {
+		me = result;
+
+		//double fix for issue 1
+		if(me!=null&&me.webview!=null){
+			
+			SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("full_name", me.full_name);
+			editor.putString("status", me.status);
+			editor.putString("date", me.date);
+			if(me.hasStafflink()){
+				editor.putString("stafflink",me.stafflink);
+			} else {
+				editor.putString("stafflink","");
+			}
+			editor.putString("imglink",me.imglink);
+			editor.commit();
+			
+		}
+
+		reload(1);
+		
 	}
     
 }

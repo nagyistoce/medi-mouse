@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.TranslateAnimation;
+import android.webkit.WebView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -222,7 +223,7 @@ public class EditStatus extends medi_mouse_activity {
 
 						}
 						me.submit(EditStatus.this);
-						finish();
+						
 					}
 					
 				}});
@@ -341,6 +342,37 @@ public class EditStatus extends medi_mouse_activity {
     		
     	}
     }
+
+	@Override
+	public void onPostExecute(medi_person result) {
+
+		//double fix for issue 1
+		if(me!=null&&me.webview!=null){
+			
+			SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("full_name", me.full_name);
+			editor.putString("status", me.status);
+			editor.putString("date", me.date);
+			if(me.hasStafflink()){
+				editor.putString("stafflink",me.stafflink);
+			} else {
+				editor.putString("stafflink","");
+			}
+			editor.putString("imglink",me.imglink);
+			editor.commit();
+			
+		}
+
+		
+		
+		WebView web_view = (WebView) context.findViewById(R.id.webview);
+		web_view.setVisibility(View.VISIBLE);
+		web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
+				"text/html", "", medi_post.SITE);
+		finish();
+	}
 
 		
 	}

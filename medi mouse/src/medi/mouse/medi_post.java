@@ -182,7 +182,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=true;
 				} catch (unauthorized e) {
 					
-					me.webview="unauthorized, please log in";
+					me.webview="username/password rejected";
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
 					System.out.println("Error: "+e.getMessage());
@@ -236,7 +236,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=true;
 				} catch (unauthorized e) {
 					me.network_auth=false;
-					me.webview="unauthorized, please log in";
+					me.webview="username/password rejected";
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 				} catch (IllegalStateException e) {
 					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -251,49 +251,24 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	protected void onPostExecute(medi_person result )  {
 
 
-		Activity context = result.context;
 		medi_person me = result;
 		
-		TextView name_view = (TextView) context.findViewById(R.id.name_view);
-		TextView status_view = (TextView) context.findViewById(R.id.status_view);
-		TextView date_view = (TextView) context.findViewById(R.id.date_view);
-		//not implemented 
-		//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
-		WebView web_view = (WebView) context.findViewById(R.id.webview);
-		
-		//double fix for issue 1
-		if(me!=null&&me.webview!=null){
-			name_view.setText(me.full_name);
-			status_view.setText(me.status);
-			date_view.setText(me.date);
-			status_view.refreshDrawableState();
-			SharedPreferences spref=
-					PreferenceManager.getDefaultSharedPreferences(me.context);
-			SharedPreferences.Editor editor = spref.edit();
-			editor.putString("full_name", me.full_name);
-			editor.putString("status", me.status);
-			editor.putString("date", me.date);
-			editor.putString("stafflink",me.stafflink);
-			editor.putString("imglink",me.imglink);
-			editor.commit();
-			
-			
-			int bad = me.webview.indexOf("<img");
-			int end;
-			while (bad != -1){
-				end = me.webview.indexOf(">", bad);
-				me.webview = me.webview.substring(0, bad)+
-						me.webview.substring(end+1, me.webview.length());
-				bad = me.webview.indexOf("<img");
-			}
-			System.out.println("====================>>>\n"+me.webview);
-			web_view.setVisibility(View.VISIBLE);
-			web_view.loadDataWithBaseURL(BASE_URL, me.webview, 
-					"text/html", "", SITE);
-			//web_view.setVisibility(View.INVISIBLE);//set to invisible
-			
+		int bad = me.webview.indexOf("<img");
+		int end;
+		while (bad != -1){
+			end = me.webview.indexOf(">", bad);
+			me.webview = me.webview.substring(0, bad)+
+					me.webview.substring(end+1, me.webview.length());
+			bad = me.webview.indexOf("<img");
 		}
-		super.onPostExecute(me);
+		
+		System.out.println("====================>>>\n"+me.webview);
+		
+		
+
+		me.context.onPostExecute(me);
+		//super.onPostExecute(me);
+		
 	}
 }
 
