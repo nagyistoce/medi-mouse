@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -83,8 +84,12 @@ public class ViewPerson extends medi_mouse_activity {
 				switch (arg2) {
 					case 0:
 						//call desk
-						
-						break;
+						String url = "tel:781774"+me.phone_ext;
+						System.out.println("url: "+url);
+						Intent callIntent = new Intent(Intent.ACTION_CALL);
+				        callIntent.setData(Uri.parse(url));
+				        startActivity(callIntent);
+				        
 					case 1:
 						//Find Person
 						

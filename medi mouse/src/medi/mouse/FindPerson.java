@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.Window;
 import android.view.animation.TranslateAnimation;
@@ -24,9 +26,12 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView.OnEditorActionListener;
 
 public class FindPerson extends medi_mouse_activity {
 	private static final float TRANS_START = -25;
@@ -52,14 +57,6 @@ public class FindPerson extends medi_mouse_activity {
     	//setup ui stuff
     	
     	
-    	TranslateAnimation anim = new TranslateAnimation(0, 0, -50, 0);
-    	TranslateAnimation animText = new TranslateAnimation(0, 0, -25, 0);
-    	
-        anim.setDuration(1000);
-        anim.setFillAfter(true);
-        animText.setDuration(700);
-        animText.setFillAfter(true);
-        
     	
     	client = medi_post.connect(username, password);
         me = new medi_person(this,1);
@@ -70,41 +67,69 @@ public class FindPerson extends medi_mouse_activity {
         
         tv.setEnabled(true);
         
+        TranslateAnimation anim;
+        anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+	    anim.setDuration(EditStatus.TRANS_DUR);
+	    anim.setFillAfter(true);
+	    TableLayout lp = (TableLayout) me.context.findViewById(R.id.input_view);
+        anim.setDuration(TRANS_DUR);
+        anim.setFillAfter(true);
+        //lp.setTextFilterEnabled(true);
+        lp.startAnimation(anim);
         
-        tv.startAnimation(anim);
+        
+        tv.setOnEditorActionListener(new OnEditorActionListener(){
 
+			public boolean onEditorAction(TextView arg0, int keyCode, KeyEvent arg2) {
+				
+				dolookup();
+			    
+				
+				return false;
+			}
+        	
+        });
+        tv.setOnKeyListener(new OnKeyListener(){
+
+			public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
+				System.out.println("onkeylistener:" + arg1);
+				return false;
+			}
+        	
+        });
+        tv.setOnFocusChangeListener(new OnFocusChangeListener(){
+
+			public void onFocusChange(View arg0, boolean arg1) {
+				// TODO Auto-generated method stub
+				System.out.println("focus changed");
+				
+			}
+        	
+        });
+        
         //http://www.meditech.com/employees/RATweb/RATweb.mps
         //VIEW.location.replace('RATWeb.mps?TYPE=Lookup&User='+value+'&Key='+lookup.value);
     	//HEAD.document.forms[0].User.value='';
         
 	}
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		System.out.println(keyCode);
-		if (event.isLongPress()) {
-			return false;
-		}else if (keyCode == KeyEvent.KEYCODE_BACK ||
-	    		keyCode == KeyEvent.KEYCODE_ENTER) {
-	    	
-	    	tv = (TextView) findViewById(R.id.entry);
-	    	if (tv.getText().length()>0){
-	    		String user = "";
-				CharSequence ch = tv.getText();
-				for(int x = 0; x< ch.length();x++) {
-					user += tv.getText().charAt(x);
-				}
-				
-				FindPerson.this.find(user);
-				//tv.setVisibility(View.INVISIBLE);
-				//tv.setVisibility(View.GONE);
-				return false;
-	    	} else {
-	    		return super.onKeyDown(keyCode, event);
-	    	}
-	        
-	    } else {
-	    	return super.onKeyDown(keyCode, event);
-	    }
+	
+	public boolean dolookup(){
+			
+    	tv = (TextView) findViewById(R.id.entry);
+    	if (tv.getText().length()>0){
+    		String user = "";
+			CharSequence ch = tv.getText();
+			for(int x = 0; x< ch.length();x++) {
+				user += tv.getText().charAt(x);
+			}
+			
+			FindPerson.this.find(user);
+			//tv.setVisibility(View.INVISIBLE);
+			//tv.setVisibility(View.GONE);
+			
+    	}
+	
+		return false;
 	}
 	protected void find(String user) {
 		System.out.println(user);
@@ -123,28 +148,51 @@ public class FindPerson extends medi_mouse_activity {
 		
 		tv = (TextView) findViewById(R.id.entry);
 		tv.setText("");
-		Iterator<String> keys = me.found_people.keySet().iterator();
-		
-		TranslateAnimation anim = new TranslateAnimation(TRANS_START, 0, 0, 0);
-        anim.setDuration(TRANS_DUR);
-        anim.setFillAfter(true);
+		Iterator<String> keys;
+		int size;
+		ListView lv = (ListView) findViewById(R.id.list_view);
+		TranslateAnimation anim;
+		if (me.found_people==null){
+			size=0;
+		} else {
+			
+			anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
+	        anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        //lp.setTextFilterEnabled(true);
+	        lp.startAnimation(anim);
+	        
+		    lv = (ListView) findViewById(R.id.list_view);
+		    lv.requestLayout();
+
+	        lv.setTextFilterEnabled(true);
+	        lv.startAnimation(anim);
+		    size = me.found_people.size();
+		}
         
-        ListView lv = (ListView) findViewById(R.id.list_view);
-        
-        lv.requestLayout();
-        
-        int size = me.found_people.size();
         final String[] options;
         boolean matches;
         if (matches=size>0){
         	options = new String[size];
-            
+        	keys = me.found_people.keySet().iterator();
 	        for (int x=0; keys.hasNext();x++){
 				String key = keys.next();
 				System.out.println(key+": "+me.found_people.get(key));
 				options[x]=key;
 			}
 	        matches = true;
+	        
+        } else if(me.found_stafflink!=null){
+        	SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("lookup_stafflink", me.found_stafflink);
+			editor.commit();
+			startActivity(new Intent(FindPerson.this, ViewPerson.class));
+			options = null;
         } else {
         	options = new String[1];
         	options[0]="no matches found";
@@ -156,8 +204,6 @@ public class FindPerson extends medi_mouse_activity {
         			R.layout.list_item, options));
         }
         
-        lv.setTextFilterEnabled(true);
-        lv.startAnimation(anim);
         if(matches){
 	        lv.setOnItemClickListener(new OnItemClickListener(){
 	

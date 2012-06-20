@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.animation.AnimationUtils;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
@@ -49,11 +50,10 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.set_status);
+        setContentView(R.layout.view_user);
                 
         
         
-        //the date spinners
         //------------------------------------------------------------------------------------------
         //establish connection to server
         
@@ -62,19 +62,25 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	boolean reload = spref.getBoolean("reload_onresume", false);
+    	boolean doreload = spref.getBoolean("reload_onresume", true);
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
-    	if (reload){
+    	//screen refresh
+    	if (doreload){
     		//onResume handles full reloads
-    		reload();
-    	}else{
     		reload(1);
+    	}else{
+    		System.out.println("initial load");
+    		reload();
     	}
+    	
+    	
+    	//----------------------------------------------------------------------------------------
+    	
     	ListView lv = (ListView) findViewById(R.id.list_view);
         
         lv.requestLayout();
@@ -87,6 +93,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
+				client.getConnectionManager().shutdown();
+				me.network_lock=false;
 				if(MedibugsActivity.this.me.hasStafflink()){
 					
 					switch (arg2) {
@@ -100,12 +108,19 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 						break;
 					case 2:
 						//Refresh
-						MedibugsActivity.this.reload();
+						if(!me.network_lock){
+							reload();
+						}
 					}
 					
 				}else {
-					Toast.makeText(MedibugsActivity.this, "Please wait for initial load to complete", 
-							Toast.LENGTH_SHORT).show();
+					if(arg2==2&&!me.network_lock){
+						
+						reload();
+					}else {
+						Toast.makeText(MedibugsActivity.this, "There was a problem with your initial load", 
+								Toast.LENGTH_SHORT).show();
+					}
 				}
 					
 			}});
@@ -175,6 +190,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	System.out.println("user "+username);
     	//release lock when you close connection
     	me.network_lock = false;
+    	System.out.println("aborting...");
     	client.getConnectionManager().shutdown();
     	client = medi_post.connect(username, password);
     	me.client=client;
@@ -183,6 +199,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	if (!me.hasStafflink()||
     			me.username!=username||
     			!me.network_auth){
+    		System.out.println("no stafflink");
     		me.stafflink=null;
     		me.username=username;
     		me.data = new HashMap<String, String>();
@@ -207,9 +224,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	}else{
     		System.out.println("partial reload");
 	    	reload(1);
-	    	//set to invisible to avoid a full reload
-	    	WebView web_view = (WebView) this.findViewById(R.id.webview);
-	    	web_view.setVisibility(View.INVISIBLE);
+	    	
+	    	
     	}
     }
     public void reload(int t){
@@ -231,12 +247,12 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	status_view.refreshDrawableState();
 
     	//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
-    	
+    	/*
 		WebView web_view = (WebView) findViewById(R.id.webview);
 		web_view.setVisibility(View.VISIBLE);
 		web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
 				"text/html", "", medi_post.SITE);
-		
+		*/
 		
     }    	
 	private class MyWebViewClient extends WebViewClient {
@@ -316,28 +332,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	for (int x=0; x<len&&equals;x++){
     		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
     	}
-    	if(!equals){
-			
-			System.out.println(arg1);
-			String username = spref.getString(arg1, "");
-			value = "user_password";
-	    	
-	    	char[] t = arg1.toCharArray();
-	    	
-	    	equals = arg1.length()== value.length();
-	    	len = arg1.length();
-	    	//not sure why this is false
-	    	//System.out.println(arg1+"==user_name? "+(arg1==value));
-	    	for (int x=0; x<len&&equals;x++){
-	    		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
-	    	}
-	    	
-			if(equals){
-				//password has been updated
-				//refresh
-				reload();
-			}
-		}
+    	
 	}
 
 	@Override

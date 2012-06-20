@@ -42,6 +42,8 @@ public class medi_person extends Activity{
 	String phone_ext;
 	private String myStafflink;
 	private boolean nosave;
+	String found_stafflink;
+	public String networkError;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -202,26 +204,35 @@ public class medi_person extends Activity{
 				
 			} else if (type=="Lookup") {
 				found_people = new HashMap<String, String>();
-				String SLpre = "<a href=\"javascript:parent.changeUser('stafflink\\";
-				String SLpost = "');\"";
+				String SLpre = "parent.changeUser('stafflink\\";
+				String SLpost = "')";
 				String Npre = ">";
 				String Npost = "</a>";
 				int index = output.indexOf(SLpre, 0);
 				int end;
 				String name,stafflink;
 				while (index!=-1) {
-					end = output.indexOf(SLpost, index);
+					end = output.indexOf(SLpost, index+SLpre.length());
+					System.out.println(index+":_:"+end);
 					stafflink = "stafflink"+fix_stafflink(output.substring(index+SLpre.length(), end));
 					
 					
 					index = output.indexOf(Npre,end);
 					end = output.indexOf(Npost, index);
 					System.out.println(index+":"+end);
-					name = output.substring(index+Npre.length(), end);
-					System.out.println(name+": "+stafflink);
-					
-					found_people.put(name, stafflink);
-					index = output.indexOf(SLpre,end);
+					if(index==-1||end==-1){
+						//stafflink & no name, only one result found
+						index=-1;
+						found_stafflink = stafflink;
+						found_people = null;
+					}else {
+						name = output.substring(index+Npre.length(), end);
+						System.out.println(name+": "+stafflink);
+						
+						found_people.put(name, stafflink);
+						
+						index = output.indexOf(SLpre,end);
+					}
 				}
 			} else if(type=="TraxView") {
 				date = medi_person.parse(output, "date = '","';");

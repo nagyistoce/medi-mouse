@@ -22,7 +22,9 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -36,10 +38,9 @@ public class EditStatus extends medi_mouse_activity {
 			
 	        super.onCreate(savedInstanceState);
 	        requestWindowFeature(Window.FEATURE_NO_TITLE);
-	        setContentView(R.layout.set_status);   
+	        setContentView(R.layout.view_user);   
 	        String username,stafflink,full_name,status,mydate;
 	        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
-	        
 	        
 	        username = spref.getString("user_name", "");
 	    	stafflink = spref.getString("stafflink", "");
@@ -125,20 +126,25 @@ public class EditStatus extends medi_mouse_activity {
 		public void display(ArrayList<String> prefix,ArrayList<Integer> selection){
 	        this.prefix=prefix;
 	        this.selection=selection;
-			TranslateAnimation anim = new TranslateAnimation(TRANS_START, 0, 0, 0);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
 	        
 	        ListView lv = (ListView) findViewById(R.id.list_view);
 	        
-	        lv.requestLayout();
 	        System.out.println("options: "+options);
 	        if(options!=null){
 	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
 	        			R.layout.list_item, options));
 	        }
-	        lv.setTextFilterEnabled(true);
-	        lv.startAnimation(anim);
+
+			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
+	        anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        //lp.setTextFilterEnabled(true);
+	        lp.startAnimation(anim);
+
+	        
 	        lv.setOnItemClickListener(new OnItemClickListener(){
 
 				public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -175,9 +181,7 @@ public class EditStatus extends medi_mouse_activity {
 		
 		public submit_button(final ArrayList<String> passdown,final ArrayList<Integer> selection) {
 			
-			TranslateAnimation anim = new TranslateAnimation(TRANS_START, 0, 0, 0);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
+			
 	        
 	        ListView lv = (ListView) findViewById(R.id.list_view);
 	        String display = "";
@@ -185,14 +189,23 @@ public class EditStatus extends medi_mouse_activity {
 	        	display += passdown.get(x)+" ";
 	        }
 	        String[] options = {"Please Confirm Selection",display};
-	        lv.requestLayout();
+	        
 	        
 	        if(options!=null){
 	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
 	        			R.layout.list_item, options));
 	        }
-	        lv.setTextFilterEnabled(true);
-	        lv.startAnimation(anim);
+	        
+
+			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
+	        anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        //lp.setTextFilterEnabled(true);
+	        lp.startAnimation(anim);
+	        
 	        lv.setOnItemClickListener(new OnItemClickListener(){
 
 				public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -366,12 +379,16 @@ public class EditStatus extends medi_mouse_activity {
 		}
 
 		
-		
-		WebView web_view = (WebView) context.findViewById(R.id.webview);
-		web_view.setVisibility(View.VISIBLE);
-		web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
-				"text/html", "", medi_post.SITE);
-		finish();
+		if(me.webview!=null){
+			WebView web_view = (WebView) me.context.findViewById(R.id.webview);
+			
+			/*
+			web_view.setVisibility(View.VISIBLE);
+			web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
+					"text/html", "", medi_post.SITE);
+			*/
+			finish();
+		}
 	}
 
 		
