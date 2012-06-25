@@ -253,7 +253,9 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
         
         lp.removeViewAt(0);
         
-        if(me.webview.indexOf("Error")!=-1){
+        //fix issue where user had the word Error in their trax it would display the html
+        int t = me.webview.indexOf("Network Error");
+        if(t!=-1&&t<10){
         	Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
         }else {
         	Toast.makeText(me.context, "Success!", Toast.LENGTH_SHORT).show();
