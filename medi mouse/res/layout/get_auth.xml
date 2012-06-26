@@ -1,32 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+ <TableLayout 
+    	android:id="@+id/table_view"
+   		android:layout_width="fill_parent"
+   
+ 		android:layout_height="wrap_content"
+ 		android:layout_marginLeft="15px"
+ 		android:layout_marginBottom="15px"
+ 		android:layout_marginRight="15px"
+ 		android:layout_marginTop="15px"
+ 		android:background="@drawable/shape">
+ 
+ <TableLayout 
+   		android:layout_width="fill_parent"
+   
+ 		android:layout_height="wrap_content"
+ 		android:layout_marginLeft="15px"
+ 		android:layout_marginBottom="15px"
+ 		android:layout_marginRight="15px"
+ 		android:layout_marginTop="15px"
+ 		android:cacheColorHint="#00000000">		
+    <EditText
+        android:id="@+id/username_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
 
     <EditText
-        android:id="@+id/username"
-        android:layout_width="296dp"
+        android:id="@+id/password_view"
         android:layout_height="wrap_content"
-        android:layout_x="10dp"
-        android:layout_y="5dp" />
-
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="291dp"
-        android:layout_height="wrap_content"
-        android:layout_x="13dp"
-        android:layout_y="48dp"
+        android:layout_width="fill_parent"
         android:inputType="textPassword" >
-
-        <requestFocus />
+		
     </EditText>
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="216dp"
-        android:layout_y="102dp"
-        android:text="@string/submit" />
+<CheckBox
+	android:id="@+id/reload_view"
+	android:text="reload on resume"/>
 
-</AbsoluteLayout>
+</TableLayout>
+</TableLayout>
+</LinearLayout>

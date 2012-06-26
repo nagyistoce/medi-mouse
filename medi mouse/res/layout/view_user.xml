@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-<TableLayout android:id="@+id/TableLayout01"
+    <TableLayout android:id="@+id/TableLayout01"
    android:layout_width="fill_parent"
  android:layout_height="wrap_content"
  android:layout_marginLeft="15px"
@@ -13,14 +12,20 @@
  android:layout_marginRight="15px"
  android:layout_marginTop="15px"
  android:background="@drawable/shape">
-    
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/top_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-       <ImageView
+        <TextView
+            android:id="@+id/name_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/picture_view" />
+
+        <ImageView
             android:id="@+id/picture_view"
             android:layout_width="110dp"
             android:layout_height="110dp"
@@ -28,65 +33,35 @@
             android:layout_alignParentTop="true"
             android:contentDescription="your face" />
 
-<TableLayout android:id="@+id/TableLayout02"
-   android:layout_width="wrap_content"
-   android:layout_height="wrap_content"
-   android:layout_marginLeft="5px"
-   android:layout_marginBottom="5px"
-   android:layout_marginRight="5px"
-   android:layout_marginTop="5px"
-   android:background="#d2c133"
-   android:layout_toRightOf="@+id/picture_view">
- 
-        <TextView
-            android:id="@+id/name_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"/>
-
- 
         <TextView
             android:id="@+id/status_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/name_view"
+            android:layout_toRightOf="@+id/picture_view"
             android:text="" />
 
         <TextView
             android:id="@+id/date_view"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            
+            android:layout_below="@+id/status_view"
+            android:layout_toRightOf="@+id/picture_view"
             android:text="" />
-     </TableLayout>
     </RelativeLayout>
     
-</TableLayout>
-<TableLayout android:id="@+id/TableLayout03"
-   android:layout_width="wrap_content"
- android:layout_height="wrap_content"
- android:layout_marginLeft="10px"
- android:layout_marginBottom="10px"
- android:layout_marginRight="10px"
- android:layout_marginTop="10px"
- android:background="#000000">
-
-<TableLayout android:id="@+id/TableLayout04"
-   android:layout_width="wrap_content"
- android:layout_height="wrap_content"
- android:layout_marginLeft="10px"
- android:layout_marginBottom="13px"
- android:layout_marginRight="13px"
- android:layout_marginTop="13px"
- android:background="@drawable/shape">
-
-<ImageView  
-        android:id="@+id/blankImageView"  
-        android:layout_width="wrap_content"  
-        android:layout_height="wrap_content"
-        android:visibility="gone"  
-        android:src="@drawable/medimouse"/>  
-        
-
+    </TableLayout>
+    <TableLayout 
+    	android:id="@+id/table_view"
+   		android:layout_width="fill_parent"
+   
+ 		android:layout_height="wrap_content"
+ 		android:layout_marginLeft="15px"
+ 		android:layout_marginBottom="15px"
+ 		android:layout_marginRight="15px"
+ 		android:layout_marginTop="15px"
+ 		android:background="@drawable/shape">
+ 		
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/llls_view"
     android:layout_width="match_parent"
@@ -96,18 +71,10 @@
 		    android:id="@+id/list_view"
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
+		    android:cacheColorHint="#00000000"
 		    />
 		
 		</LinearLayout>
-</TableLayout>
 
-	    <WebView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/webview"
-            android:visibility="gone"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
 </TableLayout>
-    	
-
 </LinearLayout>

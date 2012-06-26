@@ -1,69 +1,45 @@
 package medi.mouse;
 
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
-import android.view.animation.TranslateAnimation;
-import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.AnimationUtils;
 import android.webkit.HttpAuthHandler;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.Gallery;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import medi.mouse.EditStatus.menu_node;
-
-import org.apache.http.impl.client.DefaultHttpClient;
 
  
-public class MedibugsActivity extends Activity implements OnSharedPreferenceChangeListener{
+public class MedibugsActivity extends medi_mouse_activity implements OnSharedPreferenceChangeListener{
 
 	TextView name_view;
 	TextView status_view;
 	TextView date_view;
 	ImageView picture;
 	String status_message="";
-	
-	medi_person me;
-	public DefaultHttpClient client;
 	
 	
 	
@@ -73,11 +49,12 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
         
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.set_status);
+        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.view_user);
                 
         
         
-        //the date spinners
         //------------------------------------------------------------------------------------------
         //establish connection to server
         
@@ -86,40 +63,65 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	boolean reload = spref.getBoolean("reload_onresume", false);
+    	boolean doreload = spref.getBoolean("reload_onresume", true);
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
-    	if (reload){
+    	//screen refresh
+    	if (doreload){
     		//onResume handles full reloads
     		reload(1);
     	}else{
+    		System.out.println("initial load");
     		reload();
     	}
+    	
+    	
+    	//----------------------------------------------------------------------------------------
+    	
     	ListView lv = (ListView) findViewById(R.id.list_view);
         
         lv.requestLayout();
-        String[] options = {"Sign In/Out","Refresh"};
+        String[] options = {"Sign In/Out",
+        		"Find Person",
+        		"Refresh"};
         lv.setAdapter(new ArrayAdapter<String>(this, 
         			R.layout.list_item, options));
         lv.setOnItemClickListener(new OnItemClickListener(){
 
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
+				client.getConnectionManager().shutdown();
+				me.network_lock=false;
 				if(MedibugsActivity.this.me.hasStafflink()){
-					if(arg2==0){
-						//sign in/out
+					
+					switch (arg2) {
+					case 0:
+						//Sign In/Out
 						startActivity(new Intent(MedibugsActivity.this, EditStatus.class));
-					}else if (arg2==1){
-						//refresh
-						MedibugsActivity.this.reload();
+						break;
+					case 1:
+						//Find Person
+						startActivity(new Intent(MedibugsActivity.this, FindPerson.class));
+						break;
+					case 2:
+						//Refresh
+						if(!me.network_lock){
+							reload();
+						}
 					}
+					
 				}else {
-					Toast.makeText(MedibugsActivity.this, "Please wait for initial load to complete", 
-							Toast.LENGTH_SHORT).show();
+					if(arg2==2&&!me.network_lock){
+						
+						reload();
+					}else {
+						Toast.makeText(MedibugsActivity.this, "There was a problem with your initial load", 
+								Toast.LENGTH_SHORT).show();
+					}
 				}
 					
 			}});
@@ -141,7 +143,7 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	
     }
         
-    @Override
+	@Override
     public void onDestroy(){
     	//disconnect
     	//medi_post.disconnect(client);
@@ -182,13 +184,14 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     }
 
     public void reload(){
-		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
+    	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
     	
 		String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
     	System.out.println("user "+username);
     	//release lock when you close connection
     	me.network_lock = false;
+    	System.out.println("aborting...");
     	client.getConnectionManager().shutdown();
     	client = medi_post.connect(username, password);
     	me.client=client;
@@ -197,6 +200,8 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	if (!me.hasStafflink()||
     			me.username!=username||
     			!me.network_auth){
+    		System.out.println("no stafflink");
+    		me.stafflink=null;
     		me.username=username;
     		me.data = new HashMap<String, String>();
     		postme = new medi_post(me.data);
@@ -220,9 +225,8 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	}else{
     		System.out.println("partial reload");
 	    	reload(1);
-	    	//set to invisible to avoid a full reload
-	    	WebView web_view = (WebView) this.findViewById(R.id.webview);
-	    	web_view.setVisibility(View.INVISIBLE);
+	    	
+	    	
     	}
     }
     public void reload(int t){
@@ -242,52 +246,16 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	date_view.setText(me.date);
     	
     	status_view.refreshDrawableState();
-    	
+
+    	//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
+    	/*
+		WebView web_view = (WebView) findViewById(R.id.webview);
+		web_view.setVisibility(View.VISIBLE);
+		web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
+				"text/html", "", medi_post.SITE);
+		*/
+		
     }    	
-/*
-    class submit_listener implements OnClickListener{
-
-		public void onClick(View arg0) {
-			boolean post = false;
-			if(out_spinner.getSelectedItemPosition()!=0){
-				
-				me.out=(String) out_spinner.getSelectedItem();
-				me.loc=me.bldg=me.in="";
-				myDate date = inputDates.get(date_spinner.getSelectedItemPosition());
-
-				me.date = date.human;
-				me.YYYYmmdd = date.YYYYmmdd;
-				post = true;
-				System.out.println("-->out"+me.out);
-			} else if (in_spinner.getSelectedItemPosition()!=0&&bldg_spinner.getSelectedItemPosition()!=0){
-				
-				
-				me.bldg = (String) bldg_spinner.getSelectedItem();
-				me.loc = me.in = (String) in_spinner.getSelectedItem();
-				me.out="";
-				
-				post = true;
-				System.out.println("-->in"+me.loc);
-				System.out.println("-->in"+me.bldg);
-			}
-			System.out.println("in: "+in_spinner.getSelectedItemPosition());
-			System.out.println("out: "+out_spinner.getSelectedItemPosition());
-			System.out.println("post: "+post);
-			if (post){
-				
-				me.submit(MedibugsActivity.this);
-				
-			}	
-			//me.secondaryLoad();
-			//medi_post postme = new medi_post(me.data);
-	    	//postme.execute(me);
-	    	
-	    	
-			
-		}
-    	
-    }
-  */  
 	private class MyWebViewClient extends WebViewClient {
     	Activity activity;
     	public MyWebViewClient(Activity activity){
@@ -368,28 +336,34 @@ public class MedibugsActivity extends Activity implements OnSharedPreferenceChan
     	for (int x=0; x<len&&equals;x++){
     		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
     	}
-    	if(!equals){
+    	
+	}
+
+	@Override
+	public void onPostExecute(medi_person result) {
+		me = result;
+
+		//double fix for issue 1
+		if(me!=null&&me.webview!=null){
 			
-			System.out.println(arg1);
-			String username = spref.getString(arg1, "");
-			value = "user_password";
-	    	
-	    	char[] t = arg1.toCharArray();
-	    	
-	    	equals = arg1.length()== value.length();
-	    	len = arg1.length();
-	    	//not sure why this is false
-	    	//System.out.println(arg1+"==user_name? "+(arg1==value));
-	    	for (int x=0; x<len&&equals;x++){
-	    		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
-	    	}
-	    	
-			if(equals){
-				//password has been updated
-				//refresh
-				reload();
+			SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("full_name", me.full_name);
+			editor.putString("status", me.status);
+			editor.putString("date", me.date);
+			if(me.hasStafflink()){
+				editor.putString("stafflink",me.stafflink);
+			} else {
+				editor.putString("stafflink","");
 			}
+			editor.putString("imglink",me.imglink);
+			editor.commit();
+			
 		}
+
+		reload(1);
+		
 	}
     
 }

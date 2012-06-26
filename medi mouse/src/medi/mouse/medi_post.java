@@ -27,9 +27,15 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewManager;
+import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 //import android.widget.ImageView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
@@ -65,6 +71,20 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		client.getConnectionManager().shutdown();
 
 	}
+	
+	public void execute(medi_person me){
+		
+		LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.llls_view);
+		final ImageView imageView = new ImageView(me.context);   
+		imageView.setImageResource(R.drawable.medimouse);
+		lp.addView(imageView, 0);
+		
+		imageView.setVisibility(View.VISIBLE);
+		imageView.startAnimation(AnimationUtils.loadAnimation(me.context, R.anim.rotate));   
+		super.execute(me);
+	}
+	
+	
 	public String doSubmit(HttpClient httpclient,
 			String method, 
 			String username,
@@ -94,17 +114,12 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 				HttpGet get = new HttpGet(url);
 				response = httpclient.execute(get);
 			}else{
-				System.out.println(1);
 				HttpPost post = new HttpPost(SITE);
 				//fix for Bad Request (Invalid Verb) error
 				post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-				System.out.println(2);
 				post.setHeader("Content-Type","application/x-www-form-urlencoded");
-				System.out.println(3);
 				post.setEntity(new  UrlEncodedFormEntity(nameValuePairs));
-				System.out.println(4);
 				response = httpclient.execute(post);
-				System.out.println(5);
 				
 			}
 
@@ -155,38 +170,27 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			medi_person me = params[0];
 			//actual fix for issue 1 (the easy way)
 			me.webview="Network Error";
-			me.network_lock=false;
+			
 			String ret = "";
 			if(this.data.containsKey("TYPE")){
+				
 				try {
-					int t = 0;
-					int MAX = 100;
-					while(me.network_lock&&t<MAX){
-						try {
-							synchronized (me) {
-								me.wait(1000);
-							}
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+					
 					if(!me.network_lock){
 						me.network_lock=true;
-						//me.loadauth();
 						ret=doSubmit(me.client,"POST",me.username,
 								me.password,me.context);
+						me.network_lock=false;
 						if(ret!=null){
-							
 							me.parseresponse(ret,this.data.get("TYPE"));
 						}
 						me.webview=ret;
-						
 					}
+					
 					me.network_auth=true;
 				} catch (unauthorized e) {
 					
-					me.webview="unauthorized, please log in";
+					me.webview+=": username/password rejected";
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
 					System.out.println("Error: "+e.getMessage());
@@ -195,30 +199,18 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			} else{
 				try {
 					if(!me.hasStafflink()){
-						int t = 0;
-						int MAX = 100;
-						while(me.network_lock&&t<MAX){
-							try {
-								synchronized (me) {
-									me.wait(1000);
-								}
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						if(t!=MAX){
+						if(!me.network_lock){
 							me.network_lock=true;
 							me.primaryLoad();
 							this.data = me.data;
 							ret=doSubmit(me.client,"POST",me.username,
 									me.password,me.context);
+							me.network_lock=false;
 							if(ret!=null){
 								me.parseresponse(ret,this.data.get("TYPE"));
 							}
-							me.network_lock=false;
+							
 							me.webview=ret;
-
 						}
 					}
 
@@ -232,6 +224,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 						me.secondaryLoad();
 						this.data = me.data;
 						ret=doSubmit(me.client,"POST",me.username,me.password,me.context);
+						me.network_lock=false;
 						if(ret!=null){
 							me.parseresponse(ret,this.data.get("TYPE"));
 						}
@@ -240,7 +233,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=true;
 				} catch (unauthorized e) {
 					me.network_auth=false;
-					me.webview="unauthorized, please log in";
+					me.webview+=": username/password rejected";
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 				} catch (IllegalStateException e) {
 					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -252,52 +245,39 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		return null;
 	}
 	@Override
-	protected void onPostExecute(medi_person result )  {
-
-
-		Activity context = result.context;
-		medi_person me = result;
-		
-		TextView name_view = (TextView) context.findViewById(R.id.name_view);
-		TextView status_view = (TextView) context.findViewById(R.id.status_view);
-		TextView date_view = (TextView) context.findViewById(R.id.date_view);
-		//not implemented 
-		//ImageView picture = (ImageView) context.findViewById(R.id.picture_view);
-		WebView web_view = (WebView) context.findViewById(R.id.webview);
-		
-		//double fix for issue 1
-		if(me!=null&&me.webview!=null){
-			name_view.setText(me.full_name);
-			status_view.setText(me.status);
-			date_view.setText(me.date);
-			status_view.refreshDrawableState();
-			SharedPreferences spref=
-					PreferenceManager.getDefaultSharedPreferences(me.context);
-			SharedPreferences.Editor editor = spref.edit();
-			editor.putString("full_name", me.full_name);
-			editor.putString("status", me.status);
-			editor.putString("date", me.date);
-			editor.putString("stafflink",me.stafflink);
-			editor.putString("imglink",me.imglink);
-			editor.commit();
-			
-			
-			int bad = me.webview.indexOf("<img");
-			int end;
-			while (bad != -1){
-				end = me.webview.indexOf(">", bad);
-				me.webview = me.webview.substring(0, bad)+
-						me.webview.substring(end+1, me.webview.length());
-				bad = me.webview.indexOf("<img");
-			}
-			System.out.println("====================>>>\n"+me.webview);
-			web_view.setVisibility(View.VISIBLE);
-			web_view.loadDataWithBaseURL(BASE_URL, me.webview, 
-					"text/html", "", SITE);
-			//web_view.setVisibility(View.INVISIBLE);//set to invisible
-			
+	protected void onPostExecute(medi_person me)  {
+		//Now remove them 
+        
+        final LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.llls_view);
+        lp.getChildAt(0).clearAnimation();
+        
+        lp.removeViewAt(0);
+        
+        //fix issue where user had the word Error in their trax it would display the html
+        int t = me.webview.indexOf("Network Error");
+        if(t!=-1&&t<10){
+        	Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
+        }else {
+        	Toast.makeText(me.context, "Success!", Toast.LENGTH_SHORT).show();
+        }
+        
+        
+		int bad = me.webview.indexOf("<img");
+		int end;
+		while (bad != -1){
+			end = me.webview.indexOf(">", bad);
+			me.webview = me.webview.substring(0, bad)+
+					me.webview.substring(end+1, me.webview.length());
+			bad = me.webview.indexOf("<img");
 		}
-		super.onPostExecute(me);
+		
+		System.out.println("====================>>>\n"+me.webview);
+		
+		
+
+		me.context.onPostExecute(me);
+		//super.onPostExecute(me);
+		
 	}
 }
 

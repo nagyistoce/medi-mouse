@@ -15,31 +15,32 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.TranslateAnimation;
+import android.webkit.WebView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class EditStatus extends Activity {
+public class EditStatus extends medi_mouse_activity {
 	static int TRANS_START=800;
 	static int TRANS_DUR=500;
 	menu_node root,current;
-	medi_person me;
-	public DefaultHttpClient client;
 	ArrayList<myDate> inputDates;
 	public void onCreate(Bundle savedInstanceState) {
 			
 	        super.onCreate(savedInstanceState);
-	        
-	        setContentView(R.layout.set_status);   
+	        requestWindowFeature(Window.FEATURE_NO_TITLE);
+	        setContentView(R.layout.view_user);   
 	        String username,stafflink,full_name,status,mydate;
 	        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
-	        
 	        
 	        username = spref.getString("user_name", "");
 	    	stafflink = spref.getString("stafflink", "");
@@ -89,13 +90,11 @@ public class EditStatus extends Activity {
 	        
 	        //--------------------------------------------------------------
 	        //setup network stuff
-	    	
-	    	
 	    	String password = spref.getString("user_password","");
 	    	
 	        client = medi_post.connect(username, password);
 	        me = new medi_person(this,1);
-	        root = new menu_node(options,root_futures);
+	        root = new menu_node(options, root_futures);
 	        
 	        root.display(new ArrayList<String>(),new ArrayList<Integer>());
 	        
@@ -127,20 +126,25 @@ public class EditStatus extends Activity {
 		public void display(ArrayList<String> prefix,ArrayList<Integer> selection){
 	        this.prefix=prefix;
 	        this.selection=selection;
-			TranslateAnimation anim = new TranslateAnimation(TRANS_START, 0, 0, 0);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
 	        
 	        ListView lv = (ListView) findViewById(R.id.list_view);
 	        
-	        lv.requestLayout();
 	        System.out.println("options: "+options);
 	        if(options!=null){
 	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
 	        			R.layout.list_item, options));
 	        }
-	        lv.setTextFilterEnabled(true);
-	        lv.startAnimation(anim);
+
+			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
+	        anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        //lp.setTextFilterEnabled(true);
+	        lp.startAnimation(anim);
+
+	        
 	        lv.setOnItemClickListener(new OnItemClickListener(){
 
 				public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -177,9 +181,7 @@ public class EditStatus extends Activity {
 		
 		public submit_button(final ArrayList<String> passdown,final ArrayList<Integer> selection) {
 			
-			TranslateAnimation anim = new TranslateAnimation(TRANS_START, 0, 0, 0);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
+			
 	        
 	        ListView lv = (ListView) findViewById(R.id.list_view);
 	        String display = "";
@@ -187,14 +189,23 @@ public class EditStatus extends Activity {
 	        	display += passdown.get(x)+" ";
 	        }
 	        String[] options = {"Please Confirm Selection",display};
-	        lv.requestLayout();
+	        
 	        
 	        if(options!=null){
 	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
 	        			R.layout.list_item, options));
 	        }
-	        lv.setTextFilterEnabled(true);
-	        lv.startAnimation(anim);
+	        
+
+			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
+	        anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        //lp.setTextFilterEnabled(true);
+	        lp.startAnimation(anim);
+	        
 	        lv.setOnItemClickListener(new OnItemClickListener(){
 
 				public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -225,7 +236,7 @@ public class EditStatus extends Activity {
 
 						}
 						me.submit(EditStatus.this);
-						finish();
+						
 					}
 					
 				}});
@@ -344,6 +355,41 @@ public class EditStatus extends Activity {
     		
     	}
     }
+
+	@Override
+	public void onPostExecute(medi_person result) {
+
+		//double fix for issue 1
+		if(me!=null&&me.webview!=null){
+			
+			SharedPreferences spref=
+					PreferenceManager.getDefaultSharedPreferences(me.context);
+			SharedPreferences.Editor editor = spref.edit();
+			editor.putString("full_name", me.full_name);
+			editor.putString("status", me.status);
+			editor.putString("date", me.date);
+			if(me.hasStafflink()){
+				editor.putString("stafflink",me.stafflink);
+			} else {
+				editor.putString("stafflink","");
+			}
+			editor.putString("imglink",me.imglink);
+			editor.commit();
+			
+		}
+
+		
+		if(me.webview!=null){
+			WebView web_view = (WebView) me.context.findViewById(R.id.webview);
+			
+			/*
+			web_view.setVisibility(View.VISIBLE);
+			web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
+					"text/html", "", medi_post.SITE);
+			*/
+			finish();
+		}
+	}
 
 		
 	}
