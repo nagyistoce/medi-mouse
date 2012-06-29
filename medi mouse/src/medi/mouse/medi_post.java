@@ -18,8 +18,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 //import org.apache.commons.codec.binary.Base64;
 import android.app.Activity;
@@ -45,7 +52,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
 	public static String BASE_URL="http://www.meditech.com"; 
 	private Map<String,String> data;
-
+	public static ClientConnectionManager CM;
+	
 	public medi_post(Map<String, String> data){
 		this.data=data;
 	}
@@ -53,12 +61,17 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		this.data=new HashMap<String, String>();
 	}
 	public static DefaultHttpClient connect(String username,String password){
-
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		BasicHttpParams params = new BasicHttpParams();
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
+		CM = new ThreadSafeClientConnManager(params, schemeRegistry);
+		DefaultHttpClient httpclient = new DefaultHttpClient(CM, params);
 		httpclient.getCredentialsProvider().setCredentials(
 				new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), 
 				new UsernamePasswordCredentials(username, password));
-
+		
 		return httpclient;
 
 	}
@@ -194,6 +207,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
 					System.out.println("Error: "+e.getMessage());
+					me.webview+=": "+e.getMessage();
 				}
 				return me;
 			} else{
@@ -237,6 +251,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 				} catch (IllegalStateException e) {
 					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
+					me.webview+=": "+e.getMessage();
 				}
 			}
 			

@@ -52,7 +52,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.view_user);
-                
+        //medi_post.setConnectionManager();
         
         
         //------------------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	//release lock when you close connection
     	me.network_lock = false;
     	System.out.println("aborting...");
-    	client.getConnectionManager().shutdown();
+    	//client.getConnectionManager().shutdown();
     	client = medi_post.connect(username, password);
     	me.client=client;
     	medi_post postme;
