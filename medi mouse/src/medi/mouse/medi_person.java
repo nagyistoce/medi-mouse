@@ -3,6 +3,8 @@ package medi.mouse;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ManagedClientConnection;
+
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
