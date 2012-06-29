@@ -3,6 +3,8 @@ package medi.mouse;
 
 import java.util.HashMap;
 
+import org.apache.http.conn.ManagedClientConnection;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -52,7 +54,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.view_user);
-                
+        //medi_post.setConnectionManager();
         
         
         //------------------------------------------------------------------------------------------
@@ -94,7 +96,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				client.getConnectionManager().shutdown();
+				//client.getConnectionManager().shutdown();
+				
 				me.network_lock=false;
 				if(MedibugsActivity.this.me.hasStafflink()){
 					
@@ -109,14 +112,16 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 						break;
 					case 2:
 						//Refresh
-						if(!me.network_lock){
-							reload();
-						}
+						medi_post.disconnect(client);
+						me.network_lock=false;
+						reload();
+						
 					}
 					
 				}else {
-					if(arg2==2&&!me.network_lock){
-						
+					if(arg2==2){
+						medi_post.disconnect(client);
+						me.network_lock=false;
 						reload();
 					}else {
 						Toast.makeText(MedibugsActivity.this, "There was a problem with your initial load", 
@@ -192,7 +197,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	//release lock when you close connection
     	me.network_lock = false;
     	System.out.println("aborting...");
-    	client.getConnectionManager().shutdown();
+    	//client.getConnectionManager().shutdown();
     	client = medi_post.connect(username, password);
     	me.client=client;
     	medi_post postme;

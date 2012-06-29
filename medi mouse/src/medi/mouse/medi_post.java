@@ -3,27 +3,47 @@ package medi.mouse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthState;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
+import org.apache.http.conn.ManagedClientConnection;
+import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 //import org.apache.commons.codec.binary.Base64;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.net.Credentials;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -45,21 +65,34 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
 	public static String BASE_URL="http://www.meditech.com"; 
 	private Map<String,String> data;
-
+	public static ClientConnectionManager CM=null;
+	
 	public medi_post(Map<String, String> data){
 		this.data=data;
 	}
 	public medi_post(){
 		this.data=new HashMap<String, String>();
 	}
-	public static DefaultHttpClient connect(String username,String password){
-
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		httpclient.getCredentialsProvider().setCredentials(
+	public static HttpClient connect(String username,String password){
+		BasicHttpParams params = new BasicHttpParams();
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+		
+		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
+		CM = new ThreadSafeClientConnManager(params, schemeRegistry);
+		
+		HttpClient httpclient;
+		
+		httpclient = new DefaultHttpClient(CM, params);
+		((AbstractHttpClient) httpclient).getCredentialsProvider().setCredentials(
 				new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), 
 				new UsernamePasswordCredentials(username, password));
-
+		
+		
+		
 		return httpclient;
+		
 
 	}
 
@@ -68,8 +101,10 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		return null;
 	}
 	public static void disconnect(HttpClient client){
-		client.getConnectionManager().shutdown();
-
+		CM.shutdown();
+		
+		//CM.releaseConnection(client, (long)0, TimeUnit.DAYS);
+		//CM=null;
 	}
 	
 	public void execute(medi_person me){
@@ -85,7 +120,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	}
 	
 	
-	public String doSubmit(HttpClient httpclient,
+	public String doSubmit(HttpClient client,
 			String method, 
 			String username,
 			String password,
@@ -108,19 +143,24 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		System.out.println(method+":"+url);
 		
 
-		HttpResponse response;
+		HttpResponse response = null;
 		try {
 			if(method=="GET"){
 				HttpGet get = new HttpGet(url);
-				response = httpclient.execute(get);
+				response = client.execute(get);
+				
+				//client.sendRequestHeader(get);
+				//client.receiveResponseEntity(response);
 			}else{
 				HttpPost post = new HttpPost(SITE);
 				//fix for Bad Request (Invalid Verb) error
 				post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
 				post.setHeader("Content-Type","application/x-www-form-urlencoded");
 				post.setEntity(new  UrlEncodedFormEntity(nameValuePairs));
-				response = httpclient.execute(post);
 				
+				response = client.execute(post);
+				//client.sendRequestEntity(post);
+				//client.receiveResponseEntity(response);
 			}
 
 			String file = "";
@@ -194,6 +234,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=false;
 				} catch (IllegalStateException e) {
 					System.out.println("Error: "+e.getMessage());
+					me.webview+=": "+e.getMessage();
 				}
 				return me;
 			} else{
@@ -237,6 +278,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 				} catch (IllegalStateException e) {
 					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
+					me.webview+=": "+e.getMessage();
 				}
 			}
 			
