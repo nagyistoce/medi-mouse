@@ -3,6 +3,7 @@ package medi.mouse;
 
 import java.util.HashMap;
 
+import org.acra.ErrorReporter;
 import org.apache.http.conn.ManagedClientConnection;
 
 import android.app.Activity;
@@ -28,6 +29,7 @@ import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -322,26 +324,28 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
                 
                 myWebView.loadUrl("file:///android_asset/help_about.html");  
                 AlertDialog.Builder builder = new AlertDialog.Builder(MedibugsActivity.this);
+                Button report = (Button) alertDialogView.findViewById(R.id.crash_report);
                 builder.setView(alertDialogView);
+                report.setOnClickListener(new OnClickListener(){
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(View arg0) {
+						ErrorReporter.getInstance().handleException(null);
+						
+					}});
+               
+               builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
                 }).show();
+               	//alertDialogView.requestLayout();
             	return true;
         }
         return false;
     }
 
 	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
-		String value = "reload_onresume";
-		boolean equals = arg1.length()== value.length();
-    	int len = arg1.length();
-    	for (int x=0; x<len&&equals;x++){
-    		if((arg1.charAt(x)!=(value.charAt(x)))){ equals=false;}
-    	}
-    	
+		
 	}
 
 	@Override
@@ -374,10 +378,6 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 }
 
 class unauthorized extends Exception {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 }

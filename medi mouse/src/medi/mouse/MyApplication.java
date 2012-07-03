@@ -10,9 +10,10 @@ import android.app.Application;
  * 
  * formkey is for a google doc that stores the crash output
  */
-@ReportsCrashes(formKey = "dFhnRHR6Qy02aFZnSE9LU2NEVDRuY1E6MQ", 
+@ReportsCrashes(formKey = "", 
 mode = ReportingInteractionMode.TOAST,
-resToastText = R.string.crashing) 
+resToastText = R.string.crashing,
+mailTo = "mm.reports@chewnoill.com") 
 public class MyApplication extends Application {
 	@Override
     public void onCreate() {

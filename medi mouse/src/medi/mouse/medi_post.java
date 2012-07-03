@@ -188,9 +188,6 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			System.out.println(file);
 
 			return file;
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println(":::"+e.getMessage());
@@ -199,7 +196,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			//e.printStackTrace();
 		}
 
-		return "Network Error";
+		
 	}
 
 
@@ -232,9 +229,6 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					
 					me.webview+=": username/password rejected";
 					me.network_auth=false;
-				} catch (IllegalStateException e) {
-					System.out.println("Error: "+e.getMessage());
-					me.webview+=": "+e.getMessage();
 				}
 				return me;
 			} else{
@@ -276,9 +270,6 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					me.network_auth=false;
 					me.webview+=": username/password rejected";
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
-				} catch (IllegalStateException e) {
-					//Toast.makeText(me.context, "Oh no! " + e.getMessage(), Toast.LENGTH_SHORT).show();
-					me.webview+=": "+e.getMessage();
 				}
 			}
 			
