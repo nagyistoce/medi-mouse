@@ -79,8 +79,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     		//onResume handles full reloads
     		reload(1);
     	}else{
-    		System.out.println("initial load");
-    		reload();
+    		//System.out.println("initial load");
+    		//reload();
     	}
     	
     	
@@ -126,7 +126,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 						me.network_lock=false;
 						reload();
 					}else {
-						Toast.makeText(MedibugsActivity.this, "There was a problem with your initial load", 
+						Toast.makeText(MedibugsActivity.this, "Please Refresh", 
 								Toast.LENGTH_SHORT).show();
 					}
 				}
@@ -203,6 +203,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	client = medi_post.connect(username, password);
     	me.client=client;
     	medi_post postme;
+    	System.out.println("stafflink: "+me.stafflink);
     	
     	if (!me.hasStafflink()||
     			me.username!=username||
@@ -211,11 +212,11 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     		me.stafflink=null;
     		me.username=username;
     		me.data = new HashMap<String, String>();
-    		postme = new medi_post(me.data);
+    		postme = new medi_post(me.data,me.is_lss);
     		postme.execute(me);
     	} else {	
 			me.secondaryLoad();
-			postme = new medi_post(me.data);
+			postme = new medi_post(me.data,me.is_lss);
 	    	postme.execute(me);
     	}
 	}
@@ -364,7 +365,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 			if(me.hasStafflink()){
 				editor.putString("stafflink",me.stafflink);
 			} else {
-				editor.putString("stafflink","");
+				//editor.putString("stafflink","");
+				//
 			}
 			editor.putString("imglink",me.imglink);
 			editor.commit();

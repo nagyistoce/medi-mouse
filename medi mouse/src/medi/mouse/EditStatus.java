@@ -44,6 +44,11 @@ public class EditStatus extends medi_mouse_activity {
 	        
 	        username = spref.getString("user_name", "");
 	    	stafflink = spref.getString("stafflink", "");
+	    	String password = spref.getString("user_password","");
+	    	
+	        client = medi_post.connect(username, password);
+	        me = new medi_person(this,1);
+	    	
 	    	
 	    	full_name = spref.getString("full_name", "");
 	    	status = spref.getString("status", "");
@@ -59,7 +64,6 @@ public class EditStatus extends medi_mouse_activity {
 	    	status_view.setText(status);
 	    	date_view.setText(mydate);
 	    	
-	        
 	        inputDates = new ArrayList<myDate>();
 	        Calendar cal = Calendar.getInstance();
 	        String[] date = new String[7];
@@ -73,7 +77,11 @@ public class EditStatus extends medi_mouse_activity {
 	        
 	        String[] options;
 	        
-	        options = getResources().getStringArray(R.array.bldg);
+	        if (me.is_lss){
+		        options = getResources().getStringArray(R.array.lss_bldg);
+	        } else {
+	        	options = getResources().getStringArray(R.array.bldg);
+	        }
 	        menu_node building = new menu_node(options);
 	        
 	        
@@ -90,10 +98,7 @@ public class EditStatus extends medi_mouse_activity {
 	        
 	        //--------------------------------------------------------------
 	        //setup network stuff
-	    	String password = spref.getString("user_password","");
 	    	
-	        client = medi_post.connect(username, password);
-	        me = new medi_person(this,1);
 	        root = new menu_node(options, root_futures);
 	        
 	        root.display(new ArrayList<String>(),new ArrayList<Integer>());
@@ -223,7 +228,7 @@ public class EditStatus extends medi_mouse_activity {
 							me.loc = me.in = passdown.get(1);
 							me.bldg = passdown.get(2);
 							me.out="";
-							
+							me.date=me.YYYYmmdd = "";
 						}else if (selection.get(0)==1){
 							
 							//signing out

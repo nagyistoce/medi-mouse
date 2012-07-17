@@ -41,7 +41,9 @@
 <CheckBox
 	android:id="@+id/reload_view"
 	android:text="reload on resume"/>
-
+<CheckBox
+	android:id="@+id/is_lss_view"
+	android:text="I'm LSS"/>
 </TableLayout>
 </TableLayout>
 </LinearLayout>
