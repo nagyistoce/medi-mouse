@@ -83,9 +83,7 @@ public class FindPerson extends medi_mouse_activity {
 			public boolean onEditorAction(TextView arg0, int keyCode, KeyEvent arg2) {
 				
 				dolookup();
-			    
-				
-				return false;
+			    return false;
 			}
         	
         });
