@@ -79,8 +79,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     		//onResume handles full reloads
     		reload(1);
     	}else{
-    		System.out.println("initial load");
-    		reload();
+    		//System.out.println("initial load");
+    		//reload();
     	}
     	
     	
@@ -126,7 +126,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 						me.network_lock=false;
 						reload();
 					}else {
-						Toast.makeText(MedibugsActivity.this, "There was a problem with your initial load", 
+						Toast.makeText(MedibugsActivity.this, "Please Refresh", 
 								Toast.LENGTH_SHORT).show();
 					}
 				}
@@ -203,6 +203,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	client = medi_post.connect(username, password);
     	me.client=client;
     	medi_post postme;
+    	System.out.println("stafflink: "+me.stafflink);
     	
     	if (!me.hasStafflink()||
     			me.username!=username||
@@ -211,11 +212,11 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     		me.stafflink=null;
     		me.username=username;
     		me.data = new HashMap<String, String>();
-    		postme = new medi_post(me.data);
+    		postme = new medi_post(me.data,me.is_lss);
     		postme.execute(me);
     	} else {	
 			me.secondaryLoad();
-			postme = new medi_post(me.data);
+			postme = new medi_post(me.data,me.is_lss);
 	    	postme.execute(me);
     	}
 	}
@@ -262,42 +263,9 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 				"text/html", "", medi_post.SITE);
 		*/
 		
-    }    	
-	private class MyWebViewClient extends WebViewClient {
-    	Activity activity;
-    	public MyWebViewClient(Activity activity){
-    		super();
-    		this.activity=activity;
-    	}
-    	@Override
-    	public void onReceivedHttpAuthRequest(WebView view,
-    	        HttpAuthHandler handler, String host, String realm) {
-
-        	SharedPreferences spref=MedibugsActivity.this.getPreferences(0);
-        	String username = spref.getString("user_name", "");
-        	String password = spref.getString("user_password","");
-        		
-    	    handler.proceed(username, password);
-    	    
-    	}
-    @Override
-	 public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error) {
-		  handler.proceed() ;
-		  }
-	 
-	 @Override
-	 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-		 Toast.makeText(activity, "Oh no! " + description, Toast.LENGTH_SHORT).show();
-	   	}
-	 
-	 @Override
-     public boolean shouldOverrideUrlLoading( WebView view, String url )
-     {
-         return false;
-     }
-
     }
-	/**
+    
+    /**
 	 * create options menu
 	 * 
 	 * 
@@ -346,6 +314,9 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 
 	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
 		
+		boolean is_lss = spref.getBoolean("is_lss", false);
+    	
+		me.is_lss = is_lss;
 	}
 
 	@Override
@@ -364,7 +335,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 			if(me.hasStafflink()){
 				editor.putString("stafflink",me.stafflink);
 			} else {
-				editor.putString("stafflink","");
+				//editor.putString("stafflink","");
+				//
 			}
 			editor.putString("imglink",me.imglink);
 			editor.commit();

@@ -45,7 +45,7 @@ public class ViewPerson extends medi_mouse_activity {
     	me.data.put("stafflink", stafflink);
     	me.data.put("TYPE", "ViewUser");
     	me.data.put("view", "Photo");
-		medi_post postme = new medi_post(me.data);
+		medi_post postme = new medi_post(me.data,me.is_lss);
 		postme.execute(me);
         
 		

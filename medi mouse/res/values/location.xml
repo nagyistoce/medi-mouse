@@ -26,6 +26,10 @@
         <item>Working at home</item>
         <item>Working at site</item>
     </string-array>
+    <string-array name="lss_bldg">
+        <item>Eden Prairie</item>
+        <item>Minnetonka</item>
+    </string-array>
     <string-array name="out">
         <item>Out for the day</item>
         <item>Out Sick</item>

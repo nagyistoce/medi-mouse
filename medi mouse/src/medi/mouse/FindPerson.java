@@ -37,7 +37,7 @@ public class FindPerson extends medi_mouse_activity {
 	private static final float TRANS_START = -25;
 	private static final long TRANS_DUR = 1000;
 	menu_node root,current;
-
+	
 	ArrayList<myDate> inputDates;
 	String stafflink,myStafflink;
 	private TextView tv;
@@ -138,7 +138,7 @@ public class FindPerson extends medi_mouse_activity {
 		me.data.put("Key", "User");
 		me.data.put("User", user);
 		medi_post postme;
-		postme = new medi_post(me.data);
+		postme = new medi_post(me.data,me.is_lss);
 		postme.execute(me);
 	}
 	@Override
