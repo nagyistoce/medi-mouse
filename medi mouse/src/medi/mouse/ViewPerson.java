@@ -84,7 +84,8 @@ public class ViewPerson extends medi_mouse_activity {
 				switch (arg2) {
 					case 0:
 						//call desk
-						String url = "tel:781774"+me.phone_ext;
+						String prefix = me.is_lss?"tel:952918":"tel:781774";
+						String url = prefix+me.phone_ext;
 						System.out.println("url: "+url);
 						Intent callIntent = new Intent(Intent.ACTION_CALL);
 				        callIntent.setData(Uri.parse(url));
