@@ -329,7 +329,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
                 report.setOnClickListener(new OnClickListener(){
 
 					public void onClick(View arg0) {
-						ErrorReporter.getInstance().handleException(null);
+						ErrorReporter.getInstance().handleException(
+								new Exception("haha, I found an error"));
 						
 					}});
                
