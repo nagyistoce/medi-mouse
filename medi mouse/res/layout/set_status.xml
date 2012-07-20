@@ -2,7 +2,6 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 <TableLayout android:id="@+id/TableLayout01"
@@ -17,7 +16,6 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/top_view"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
        <ImageView
@@ -89,12 +87,10 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/llls_view"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
     		<ListView
 		    android:id="@+id/list_view"
-		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content"
 		    />
 		

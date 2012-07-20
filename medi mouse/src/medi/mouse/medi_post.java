@@ -61,17 +61,23 @@ import android.widget.Toast;
 public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	public static String SITE= "https://www.meditech.com/employees/RATweb/RATWeb.mps";
-	public static String SITE2="http://www.meditech.com/employees/RATweb/RATWeb.mps";
-	public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
-	public static String BASE_URL="http://www.meditech.com"; 
+	public static String LSS_SITE= "https://www.staff.lssdata.com/RATweb/RATweb.mps";
+	
+	//public static String SITE2="http://www.meditech.com/employees/RATweb/RATWeb.mps";
+	//public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
+	//public static String BASE_URL="http://www.meditech.com"; 
 	private Map<String,String> data;
+	private boolean is_lss = false;
 	public static ClientConnectionManager CM=null;
 	
-	public medi_post(Map<String, String> data){
+	public medi_post(Map<String, String> data,boolean is_lss){
 		this.data=data;
+		this.is_lss=is_lss;
 	}
-	public medi_post(){
+	public medi_post(boolean is_lss){
+		
 		this.data=new HashMap<String, String>();
+		this.is_lss=is_lss;
 	}
 	public static HttpClient connect(String username,String password){
 		BasicHttpParams params = new BasicHttpParams();
@@ -130,42 +136,35 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 				new ArrayList<NameValuePair>(data.size());
 		Set<String> keys = data.keySet();
 		Iterator<String> keyIter = keys.iterator();
-		String post_data="";
-		for(int i=0; keyIter.hasNext(); i++) {
+		while( keyIter.hasNext() ) {
 			String key = (String) keyIter.next();
-			System.out.println("posting key "+i+": "+key+" value: "+data.get(key));
 			if (key.length()>0){
 				nameValuePairs.add(new BasicNameValuePair(key, data.get(key)));
 			}
 		}
 
-		String url = SITE+"?"+post_data;
-		System.out.println(method+":"+url);
-		
-
-		HttpResponse response = null;
-		try {
-			if(method=="GET"){
-				HttpGet get = new HttpGet(url);
-				response = client.execute(get);
-				
-				//client.sendRequestHeader(get);
-				//client.receiveResponseEntity(response);
-			}else{
-				HttpPost post = new HttpPost(SITE);
-				//fix for Bad Request (Invalid Verb) error
-				post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
-				post.setHeader("Content-Type","application/x-www-form-urlencoded");
-				post.setEntity(new  UrlEncodedFormEntity(nameValuePairs));
-				
-				response = client.execute(post);
-				//client.sendRequestEntity(post);
-				//client.receiveResponseEntity(response);
+		try{
+			HttpPost post;
+			if(is_lss){
+				post = new HttpPost(LSS_SITE);
+				System.out.println(LSS_SITE);
+			} else {
+				post = new HttpPost(SITE);
+				System.out.println(SITE);
 			}
-
+			
+			//fix for Bad Request (Invalid Verb) error
+			post.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+			post.setHeader("Content-Type","application/x-www-form-urlencoded");
+			post.setEntity(new  UrlEncodedFormEntity(nameValuePairs));
+			
+			HttpResponse response = client.execute(post);
+			//client.sendRequestEntity(post);
+			//client.receiveResponseEntity(response);
+	
 			String file = "";
 			String line = "";
-
+			
 			//webview.setHttpAuthUsernamePassword(SITE, "meditech.com", username, password);
 			//webview.postUrl(SITE, EncodingUtils.getBytes(post_data, "BASE64"));
 
@@ -177,23 +176,19 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			while((line=in.readLine())!=null) {
 				file += line;				
 			}
-			System.out.println(7);
 			
 			if(file.contains("not authorized")){
 				throw new unauthorized();
 			}
-			System.out.println(8);
 			
 			in.close();
 			System.out.println(file);
 
 			return file;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println(":::"+e.getMessage());
 			return "Network Error: "+e.getMessage();
-			//startActivity(new Intent(this, EditPreferences.class));
-			//e.printStackTrace();
+			
 		}
 
 		

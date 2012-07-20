@@ -27,7 +27,7 @@ public class medi_person extends Activity{
 
 	boolean network_lock = false;
 	boolean network_auth = false;
-	
+	boolean is_lss = false;
 	/*what to post 
 	 * im not sure if i can throw more then one object through
 	 * the AsyncTask gateway so im internalizing everything ill need.
@@ -70,6 +70,8 @@ public class medi_person extends Activity{
     	date = spref.getString("date", "");
     	imgfile = spref.getString("imgfile", "");
     	
+    	is_lss = spref.getBoolean("is_lss", false);
+    	
 		client = context.client;
         data = new HashMap<String, String>();
         
@@ -98,6 +100,7 @@ public class medi_person extends Activity{
     	status = spref.getString("status", "");
     	date = spref.getString("date", "");
     	imgfile = spref.getString("imgfile", "");
+    	is_lss = spref.getBoolean("is_lss", false);
     	
 		client = context.client;
         data = new HashMap<String, String>();	    		
@@ -110,8 +113,9 @@ public class medi_person extends Activity{
 		this.stafflink=stafflink;
 		this.myStafflink=myStafflink;
 		this.context=context;
-		
-		
+		SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(context);
+		this.is_lss = spref.getBoolean("is_lss", false);
+    	
 	}
 	
 	public void secondaryLoad(){
@@ -155,7 +159,7 @@ public class medi_person extends Activity{
 			data.put("YYYYMMDDdate", YYYYmmdd);
 			data.put("TYPE","Save");
 			
-			medi_post post = new medi_post(data);
+			medi_post post = new medi_post(data,is_lss);
 	    	
 			post.execute(this);
 		}

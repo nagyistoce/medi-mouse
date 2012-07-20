@@ -45,7 +45,7 @@ public class ViewPerson extends medi_mouse_activity {
     	me.data.put("stafflink", stafflink);
     	me.data.put("TYPE", "ViewUser");
     	me.data.put("view", "Photo");
-		medi_post postme = new medi_post(me.data);
+		medi_post postme = new medi_post(me.data,me.is_lss);
 		postme.execute(me);
         
 		
@@ -84,7 +84,8 @@ public class ViewPerson extends medi_mouse_activity {
 				switch (arg2) {
 					case 0:
 						//call desk
-						String url = "tel:781774"+me.phone_ext;
+						String prefix = me.is_lss?"tel:952918":"tel:781774";
+						String url = prefix+me.phone_ext;
 						System.out.println("url: "+url);
 						Intent callIntent = new Intent(Intent.ACTION_CALL);
 				        callIntent.setData(Uri.parse(url));
