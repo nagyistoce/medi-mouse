@@ -43,6 +43,10 @@ public class medi_person extends Activity{
 	private boolean nosave;
 	String found_stafflink;
 	public String networkError;
+	public HttpClient trax_client;
+	public HttpClient core_client;
+	public String lss_core_username;
+	public String lss_core_password;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,6 +67,7 @@ public class medi_person extends Activity{
         
         
         username = spref.getString("user_name", "");
+        password = spref.getString("user_password", "");
     	stafflink = spref.getString("stafflink", "");
     	imglink = spref.getString("imglink", "");
     	full_name = spref.getString("full_name", "");
@@ -71,15 +76,20 @@ public class medi_person extends Activity{
     	imgfile = spref.getString("imgfile", "");
     	
     	is_lss = spref.getBoolean("is_lss", false);
+    
+
+        lss_core_username = spref.getString("lss_core_username", "");
+        lss_core_password = spref.getString("lss_core_password", "");
     	
-		client = context.client;
+    	client = context.client;
+		//trax_client = context.trax_client;
+		//core_client = context.core_client;
         data = new HashMap<String, String>();
         
         //get current status
         //medi_post post = new medi_post(data);
     	//post.execute(this);
     
-	    		
 	}
 	/**
 	 * medi_person
@@ -101,6 +111,10 @@ public class medi_person extends Activity{
     	date = spref.getString("date", "");
     	imgfile = spref.getString("imgfile", "");
     	is_lss = spref.getBoolean("is_lss", false);
+    	
+
+        lss_core_username = spref.getString("lss_core_username", "");
+        lss_core_password = spref.getString("lss_core_password", "");
     	
 		client = context.client;
         data = new HashMap<String, String>();	    		

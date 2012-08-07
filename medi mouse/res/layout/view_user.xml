@@ -4,14 +4,14 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
     <TableLayout android:id="@+id/TableLayout01"
-   android:layout_width="fill_parent"
- android:layout_height="wrap_content"
- android:layout_marginLeft="15px"
- android:layout_marginBottom="15px"
- android:layout_marginRight="15px"
- android:layout_marginTop="15px"
- android:background="@drawable/shape">
-    <RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+ 		android:layout_marginLeft="15px"
+ 		android:layout_marginBottom="15px"
+ 		android:layout_marginRight="15px"
+ 		android:layout_marginTop="15px"
+ 		android:background="@drawable/shape">
+	<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/top_view"
         android:layout_height="wrap_content" >
@@ -47,30 +47,58 @@
             android:layout_toRightOf="@+id/picture_view"
             android:text="" />
     </RelativeLayout>
-    
-    </TableLayout>
-    <TableLayout 
-    	android:id="@+id/table_view"
-   		android:layout_width="fill_parent"
-   
- 		android:layout_height="wrap_content"
- 		android:layout_marginLeft="15px"
- 		android:layout_marginBottom="15px"
- 		android:layout_marginRight="15px"
- 		android:layout_marginTop="15px"
- 		android:background="@drawable/shape">
- 		
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/llls_view"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
-    		<ListView
-		    android:id="@+id/list_view"
-		    android:layout_height="wrap_content"
-		    android:cacheColorHint="#00000000"
-		    />
-		
-		</LinearLayout>
-
 </TableLayout>
+
+<ScrollView 
+    android:layout_height="fill_parent" 
+    android:layout_width="fill_parent"
+    android:layout_marginLeft="15px"
+	android:layout_marginBottom="15px"
+	android:layout_marginRight="15px"
+	android:layout_marginTop="15px">
+
+<LinearLayout android:orientation="vertical" >
+
+<TableLayout 
+   	android:id="@+id/options_table_view"
+	android:background="@drawable/shape">
+ 	<LinearLayout
+ 		android:orientation="vertical" 
+		android:id="@+id/options_menu_view"
+		android:layout_height="wrap_content"/>
+</TableLayout>
+
+<View
+	android:layout_width="fill_parent"
+	android:layout_height="30px">
+</View>
+
+<TableLayout 
+   	android:id="@+id/core_table_view"
+	android:background="@drawable/shape">
+ 	<LinearLayout
+ 		android:orientation="vertical" 
+		android:id="@+id/core_view"
+		android:layout_height="wrap_content"/>
+	
+</TableLayout>
+
+<LinearLayout
+    android:id="@+id/refresh_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_weight="1"
+    android:orientation="vertical" >
+
+</LinearLayout>
+
+</LinearLayout>
+</ScrollView>
+
+<LinearLayout android:layout_weight="1" 
+	android:layout_height="fill_parent" 
+    android:layout_width="fill_parent">
+    
+
+</LinearLayout>
 </LinearLayout>

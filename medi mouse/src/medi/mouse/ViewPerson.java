@@ -9,9 +9,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,48 +67,24 @@ public class ViewPerson extends medi_mouse_activity {
     	status_view.refreshDrawableState();
 
 
-		ListView lv = (ListView) findViewById(R.id.list_view);
-        
-        lv.requestLayout();
-        String[] options = {"Call Desk (x"+me.phone_ext+")",
-        		"",
-        		"Refresh"};
-        
-        
-        
-        lv.setAdapter(new ArrayAdapter<String>(this, 
-        			R.layout.list_item, options));
-        lv.setOnItemClickListener(new OnItemClickListener(){
-        	//stafflink\cohen,william.cdb
-        	
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				switch (arg2) {
-					case 0:
-						//call desk
-						String prefix = me.is_lss?"tel:952918":"tel:781774";
-						String url = prefix+me.phone_ext;
-						System.out.println("url: "+url);
-						Intent callIntent = new Intent(Intent.ACTION_CALL);
-				        callIntent.setData(Uri.parse(url));
-				        startActivity(callIntent);
-				        
-					case 1:
-						//Find Person
-						
-						
-						break;
-					case 2:
-						//Refresh
-						
-					}
-					
-				
-					
-			}});
-
-    	
-
+		//ListView lv = (ListView) findViewById(R.id.select_view);
+		LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+		ll.removeAllViews();
+		View v = this.getLayoutInflater().inflate(R.layout.menu, null);
+		TextView tv = (TextView) v.findViewById(R.id.name);
+		tv.setText("Call Desk (x"+me.phone_ext+")");
+		tv.setOnClickListener(new OnClickListener(){
+		public void onClick(View arg0) {
+			String prefix = me.is_lss?"tel:952918":"tel:781774";
+			String url = prefix+me.phone_ext;
+			System.out.println("url: "+url);
+			Intent callIntent = new Intent(Intent.ACTION_CALL);
+	        callIntent.setData(Uri.parse(url));
+	        startActivity(callIntent);
+		}});
+		ll.addView(v, 0);
+		ll.requestLayout();
+		
 	}
 
 }

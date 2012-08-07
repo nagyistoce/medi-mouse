@@ -1,9 +1,11 @@
 package medi.mouse;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.acra.ErrorReporter;
+import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ManagedClientConnection;
 
 import android.app.Activity;
@@ -15,10 +17,12 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
@@ -31,6 +35,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,7 +57,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     public void onCreate(Bundle savedInstanceState) {
     	
         
-        super.onCreate(savedInstanceState);
+       super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.view_user);
@@ -67,73 +72,62 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	boolean doreload = spref.getBoolean("reload_onresume", true);
+    	
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
-    	//screen refresh
-    	if (doreload){
-    		//onResume handles full reloads
-    		reload(1);
-    	}else{
-    		//System.out.println("initial load");
-    		//reload();
-    	}
     	
+    	//create list of linear layouts
+        
+        LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+        ll.removeAllViews();
+        View v = this.getLayoutInflater().inflate(R.layout.menu, null);
+        TextView tv = (TextView) v.findViewById(R.id.name);
+        tv.setText("Sign In/Out");
+        tv.setOnClickListener(new OnClickListener(){
+			public void onClick(View arg0) {
+				startActivity(new Intent(MedibugsActivity.this,EditStatus.class));
+			}});
+        ll.addView(v, 0);
+        
+        v = this.getLayoutInflater().inflate(R.layout.menu, null);
+        tv = (TextView) v.findViewById(R.id.name);
+        
+        tv.setText("Find Person");
+        tv.setOnClickListener(new OnClickListener(){
+			public void onClick(View arg0) {
+				startActivity(new Intent(MedibugsActivity.this,FindPerson.class));
+			}});
+        ll.addView(v, 1);
+        
+        v = this.getLayoutInflater().inflate(R.layout.menu, null);
+        tv = (TextView) v.findViewById(R.id.name);
+        
+        tv.setText("Refresh");
+        tv.setOnClickListener(new OnClickListener(){
+			public void onClick(View arg0) {
+				MedibugsActivity.this.reload();
+			}});
+        ll.addView(v, 2);
+        
+        Log.d("UI","-------------");
+        final ArrayList<View> views = new ArrayList<View>();
+        views.add(ll);
+        
+        
+        Log.d("UI","views size:"+views.size());
+        
+        
+        
+        //screen refresh
+    	core_post cpost = new core_post(false);
+    	cpost.execute(me);
     	
     	//----------------------------------------------------------------------------------------
-    	
-    	ListView lv = (ListView) findViewById(R.id.list_view);
-        
-        lv.requestLayout();
-        String[] options = {"Sign In/Out",
-        		"Find Person",
-        		"Refresh"};
-        lv.setAdapter(new ArrayAdapter<String>(this, 
-        			R.layout.list_item, options));
-        lv.setOnItemClickListener(new OnItemClickListener(){
-
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {
-				//client.getConnectionManager().shutdown();
-				
-				me.network_lock=false;
-				if(MedibugsActivity.this.me.hasStafflink()){
-					
-					switch (arg2) {
-					case 0:
-						//Sign In/Out
-						startActivity(new Intent(MedibugsActivity.this, EditStatus.class));
-						break;
-					case 1:
-						//Find Person
-						startActivity(new Intent(MedibugsActivity.this, FindPerson.class));
-						break;
-					case 2:
-						//Refresh
-						medi_post.disconnect(client);
-						me.network_lock=false;
-						reload();
-						
-					}
-					
-				}else {
-					if(arg2==2){
-						medi_post.disconnect(client);
-						me.network_lock=false;
-						reload();
-					}else {
-						Toast.makeText(MedibugsActivity.this, "Please Refresh", 
-								Toast.LENGTH_SHORT).show();
-					}
-				}
-					
-			}});
-
-    	
+    	    	
     	/*
     	picture.setOnClickListener(new picture_listener());
     	File imageFile = new File(me.imgfile);
@@ -189,7 +183,9 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 		}
     	
     }
-
+    /**
+     * full reload.  Creates new connection with the server and requests current state.
+     */
     public void reload(){
     	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(MedibugsActivity.this);
     	
@@ -203,11 +199,11 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	client = medi_post.connect(username, password);
     	me.client=client;
     	medi_post postme;
+    	
     	System.out.println("stafflink: "+me.stafflink);
     	
     	if (!me.hasStafflink()||
-    			me.username!=username||
-    			!me.network_auth){
+    			me.username!=username){
     		System.out.println("no stafflink");
     		me.stafflink=null;
     		me.username=username;
@@ -223,20 +219,12 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     @Override
     public void onResume(){
     	super.onResume();
-
-    	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
-    	
-    	boolean doreload = spref.getBoolean("reload_onresume", true);
-    	if (doreload){
-    		System.out.println("full reload");
-    		reload();
-    	}else{
-    		System.out.println("partial reload");
-	    	reload(1);
-	    	
-	    	
-    	}
+    	reload(1);
     }
+    /**
+     * reloads screen fields with saved data
+     * @param t - ignored
+     */
     public void reload(int t){
     	//just refresh screen
     	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);

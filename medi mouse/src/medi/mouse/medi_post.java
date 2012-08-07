@@ -46,6 +46,7 @@ import android.content.SharedPreferences;
 import android.net.Credentials;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewManager;
@@ -63,12 +64,11 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	public static String SITE= "https://www.meditech.com/employees/RATweb/RATWeb.mps";
 	public static String LSS_SITE= "https://www.staff.lssdata.com/RATweb/RATweb.mps";
 	
-	//public static String SITE2="http://www.meditech.com/employees/RATweb/RATWeb.mps";
-	//public static String SITE_IMG_DIR = "http://www.meditech.com/employees/RATweb";
-	//public static String BASE_URL="http://www.meditech.com"; 
 	private Map<String,String> data;
 	private boolean is_lss = false;
 	public static ClientConnectionManager CM=null;
+	
+	public static int counter=0;
 	
 	public medi_post(Map<String, String> data,boolean is_lss){
 		this.data=data;
@@ -79,24 +79,31 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		this.data=new HashMap<String, String>();
 		this.is_lss=is_lss;
 	}
-	public static HttpClient connect(String username,String password){
-		BasicHttpParams params = new BasicHttpParams();
+	private static void init(){
+		
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		final SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
 		
+		BasicHttpParams params = new BasicHttpParams();
 		schemeRegistry.register(new Scheme("https", sslSocketFactory, 443));
 		CM = new ThreadSafeClientConnManager(params, schemeRegistry);
 		
+	}
+	public static HttpClient connect(String username,String password){
+		
+		if(CM==null) {
+			init();
+		}
+		Log.d("medi_post","new http client: "+(counter++));
+		BasicHttpParams params = new BasicHttpParams();
 		HttpClient httpclient;
 		
 		httpclient = new DefaultHttpClient(CM, params);
 		((AbstractHttpClient) httpclient).getCredentialsProvider().setCredentials(
 				new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), 
 				new UsernamePasswordCredentials(username, password));
-		
-		
-		
+		CM.closeIdleConnections(120, TimeUnit.SECONDS);
 		return httpclient;
 		
 
@@ -114,14 +121,16 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	}
 	
 	public void execute(medi_person me){
+		Log.d("medi_post","exec1");
 		
-		LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.llls_view);
+		LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.refresh_view);
 		final ImageView imageView = new ImageView(me.context);   
 		imageView.setImageResource(R.drawable.medimouse);
 		lp.addView(imageView, 0);
 		
 		imageView.setVisibility(View.VISIBLE);
-		imageView.startAnimation(AnimationUtils.loadAnimation(me.context, R.anim.rotate));   
+		imageView.startAnimation(AnimationUtils.loadAnimation(me.context, R.anim.rotate));
+		Log.d("medi_post","exec2");
 		super.execute(me);
 	}
 	
@@ -144,6 +153,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 		}
 
 		try{
+			Log.d("medi_post","post 1");
 			HttpPost post;
 			if(is_lss){
 				post = new HttpPost(LSS_SITE);
@@ -161,7 +171,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			HttpResponse response = client.execute(post);
 			//client.sendRequestEntity(post);
 			//client.receiveResponseEntity(response);
-	
+			Log.d("medi_post","post 2");
 			String file = "";
 			String line = "";
 			
@@ -171,7 +181,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(response.getEntity().getContent()));
 			System.out.println(6);
-			
+			Log.d("medi_post","post 3");
 
 			while((line=in.readLine())!=null) {
 				file += line;				
@@ -182,11 +192,12 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}
 			
 			in.close();
-			System.out.println(file);
+			Log.d("medi_post",file);
 
 			return file;
 		} catch (IOException e) {
-			System.out.println(":::"+e.getMessage());
+			Log.d("medi_post",":::"+e.getMessage()+"\n");
+			
 			return "Network Error: "+e.getMessage();
 			
 		}
@@ -197,7 +208,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	@Override
 	protected medi_person doInBackground(medi_person... params) {
-		
+		Log.d("medi_post","exec3");
 		if(params.length>0){
 			medi_person me = params[0];
 			//actual fix for issue 1 (the easy way)
@@ -207,16 +218,16 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			if(this.data.containsKey("TYPE")){
 				
 				try {
+					Log.d("medi_post","exec4");
 					
-					if(!me.network_lock){
-						me.network_lock=true;
 						ret=doSubmit(me.client,"POST",me.username,
 								me.password,me.context);
 						me.network_lock=false;
 						if(ret!=null){
+							Log.d("medi_post","exec4.1");
 							me.parseresponse(ret,this.data.get("TYPE"));
-						}
-						me.webview=ret;
+					Log.d("medi_post","exec4.2");
+					me.webview=ret;
 					}
 					
 					me.network_auth=true;
@@ -228,9 +239,8 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 				return me;
 			} else{
 				try {
+					Log.d("medi_post","exec5");
 					if(!me.hasStafflink()){
-						if(!me.network_lock){
-							me.network_lock=true;
 							me.primaryLoad();
 							this.data = me.data;
 							ret=doSubmit(me.client,"POST",me.username,
@@ -239,12 +249,11 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 							if(ret!=null){
 								me.parseresponse(ret,this.data.get("TYPE"));
 							}
-							
 							me.webview=ret;
-						}
 					}
 
-					if(me.stafflink!=null&&!me.network_lock){
+					if(me.hasStafflink()){
+						Log.d("medi_post","exec6");
 						SharedPreferences spref=
 								PreferenceManager.getDefaultSharedPreferences(me.context);
 						spref.edit().putString("stafflink", me.stafflink);
@@ -276,7 +285,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 	protected void onPostExecute(medi_person me)  {
 		//Now remove them 
         
-        final LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.llls_view);
+        final LinearLayout lp = (LinearLayout) me.context.findViewById(R.id.refresh_view);
         lp.getChildAt(0).clearAnimation();
         
         lp.removeViewAt(0);

@@ -13,7 +13,11 @@ import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.TranslateAnimation;
@@ -34,6 +38,7 @@ public class EditStatus extends medi_mouse_activity {
 	static int TRANS_DUR=500;
 	menu_node root,current;
 	ArrayList<myDate> inputDates;
+	protected boolean one_shot=false;
 	public void onCreate(Bundle savedInstanceState) {
 			
 	        super.onCreate(savedInstanceState);
@@ -96,9 +101,6 @@ public class EditStatus extends medi_mouse_activity {
 	        menu_node[] root_futures = {sign_in,sign_out};
 	        options = getResources().getStringArray(R.array.in_out);
 	        
-	        //--------------------------------------------------------------
-	        //setup network stuff
-	    	
 	        root = new menu_node(options, root_futures);
 	        
 	        root.display(new ArrayList<String>(),new ArrayList<Integer>());
@@ -115,7 +117,7 @@ public class EditStatus extends medi_mouse_activity {
 		public menu_node(String[] options) {
 			this.options=options;
 			this.doSubmit = true;
-			
+			Log.d("EditStatus","1"+doSubmit+this.options[0]);
 		}
 		public menu_node(String[] options,menu_node future) {
 			this.options=options;
@@ -123,111 +125,124 @@ public class EditStatus extends medi_mouse_activity {
 			for(int x = 0; x<options.length;x++){
 				futures[x]=future;
 			}
+			Log.d("EditStatus","2"+doSubmit+this.options[0]);
 		}
 		public menu_node(String[] options,menu_node[] futures){
 			this.options=options;
 			this.futures=futures;
+			Log.d("EditStatus","3"+doSubmit+this.options[0]);
 		}
 		public void display(ArrayList<String> prefix,ArrayList<Integer> selection){
 	        this.prefix=prefix;
 	        this.selection=selection;
 	        
-	        ListView lv = (ListView) findViewById(R.id.list_view);
-	        
 	        System.out.println("options: "+options);
-	        if(options!=null){
-	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
-	        			R.layout.list_item, options));
+	        for(int d = 0;d<options.length;d++){
+	        	Log.d("EditStatus",options[d]);
 	        }
-
 			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
 		    anim.setDuration(EditStatus.TRANS_DUR);
 		    anim.setFillAfter(true);
-		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
-	        //lp.setTextFilterEnabled(true);
+		    
+	        TableLayout lp = (TableLayout) me.context.findViewById(R.id.options_table_view);
 	        lp.startAnimation(anim);
-
 	        
-	        lv.setOnItemClickListener(new OnItemClickListener(){
+	        
+	        
+		        LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+		        ll.removeAllViews();
+		        
+		        for (int x=0;x<this.options.length;x++){
+		        	
+		        	View v = EditStatus.this.getLayoutInflater().inflate(R.layout.menu, null);
+			        TextView tv = (TextView) v.findViewById(R.id.name);
+			        tv.setText(options[x]);
+			        final int pos = x;
+			        if (this.doSubmit) {
+		        		tv.setOnClickListener(new OnClickListener(){
 
-				public void onItemClick(AdapterView<?> arg0, View arg1,
-						int arg2, long arg3) {
-						ArrayList<String> prefix = menu_node.this.prefix;
-						String nextOption = menu_node.this.options[arg2];
-						prefix.add(nextOption);
-						ArrayList<String> passdown = prefix;
-						ArrayList<Integer> selections = menu_node.this.selection;
-						selections.add(arg2);
-						
-						menu_node[] futures = menu_node.this.futures;
-						
-						if (menu_node.this.doSubmit) {
-							new submit_button(passdown,selections);							
-						} else if(futures.length>arg2&&
-								futures[arg2]!=null){
-							
-							System.out.println("passing: "+passdown);
-							
-							futures[arg2].display(passdown,selections);
-					        
-				        }
-				        
+							public void onClick(View arg0) {
+								ArrayList<String> next_prefix = menu_node.this.prefix;
+								String next_options = menu_node.this.options[pos];
+								next_prefix.add(next_options);
+								ArrayList<String> passdown = next_prefix;
+								ArrayList<Integer> selections = menu_node.this.selection;
+								selections.add(pos);
+								new submit_button(next_prefix,selections);
+							}
+		        			
+		        		});
+					} else {
+						tv.setOnClickListener(new menu_clicker(x));
 					}
-				});
-					
-				
+			        ll.addView(v, x);
+			        
+		        }
+		        
+		        					
+			
 		}
-	        	
+	
+		class menu_clicker implements OnClickListener {
+			int pos;
+	    	public menu_clicker(int pos){
+	    		super();
+	    		this.pos=pos;
+	    	}
+	    	
+			public void onClick(View arg0) {
+				ArrayList<String> next_prefix = menu_node.this.prefix;
+				String next_options = menu_node.this.options[pos];
+				next_prefix.add(next_options);
+				ArrayList<String> passdown = next_prefix;
+				ArrayList<Integer> selections = menu_node.this.selection;
+				selections.add(pos);
+				
+				menu_node[] futures = menu_node.this.futures;
+				
+				if(futures[pos]!=null){
+					
+					futures[pos].display(passdown,selections);
+			        
+		        }
+			}
 	        
 	}
+	
 	class submit_button {
 		
 		public submit_button(final ArrayList<String> passdown,final ArrayList<Integer> selection) {
 			
 			
 	        
-	        ListView lv = (ListView) findViewById(R.id.list_view);
+			LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+			ll.removeAllViews();
 	        String display = "";
 	        for(int x =1; x < passdown.size(); x++){
 	        	display += passdown.get(x)+" ";
 	        }
-	        String[] options = {"Please Confirm Selection",display};
 	        
+	        View v = EditStatus.this.getLayoutInflater().inflate(R.layout.menu, null);
+	        TextView tv = (TextView) v.findViewById(R.id.name);
+	        tv.setText("Please Confirm Selection");
+	        ll.addView(v, 0);
 	        
-	        if(options!=null){
-	        	lv.setAdapter(new ArrayAdapter<String>(EditStatus.this, 
-	        			R.layout.list_item, options));
-	        }
-	        
+	        v = EditStatus.this.getLayoutInflater().inflate(R.layout.menu, null);
+	        tv = (TextView) v.findViewById(R.id.name);
+	        tv.setText(display);
+	        tv.setOnTouchListener(new OnTouchListener(){
+				private boolean one_shot=true;
 
-			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
-		    anim.setDuration(EditStatus.TRANS_DUR);
-		    anim.setFillAfter(true);
-		    TableLayout lp = (TableLayout) me.context.findViewById(R.id.table_view);
-	        anim.setDuration(TRANS_DUR);
-	        anim.setFillAfter(true);
-	        //lp.setTextFilterEnabled(true);
-	        lp.startAnimation(anim);
-	        
-	        lv.setOnItemClickListener(new OnItemClickListener(){
-
-				public void onItemClick(AdapterView<?> arg0, View arg1,
-						int arg2, long arg3) {
-					
-					if(arg2==1){
-						String output = "";
-						for(int x = 0; x< passdown.size(); x++){
-							output += " "+passdown.get(x);
-							
-						}
+				public boolean onTouch(View arg0, MotionEvent arg1) {
+					if(one_shot) {
+						one_shot=false;
 						
 						if(selection.get(0)==0){
 							//signing in
 							me.loc = me.in = passdown.get(1);
 							me.bldg = passdown.get(2);
 							me.out="";
+							me.status = me.loc+", "+me.bldg;
 							me.date=me.YYYYmmdd = "";
 						}else if (selection.get(0)==1){
 							
@@ -235,22 +250,31 @@ public class EditStatus extends medi_mouse_activity {
 							me.out=(String) passdown.get(1);
 							me.loc=me.bldg=me.in="";
 							myDate date = inputDates.get(selection.get(2));
-
+							me.status = me.out;
 							me.date = date.human;
 							me.YYYYmmdd = date.YYYYmmdd;
-
+	
 						}
 						me.submit(EditStatus.this);
-						
 					}
-					
+					return true;
 				}});
-
+	        ll.addView(v, 1);
+	        
+			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+		    anim.setFillAfter(true);
+		    anim.setDuration(TRANS_DUR);
+	        anim.setFillAfter(true);
+	        
+	        TableLayout lp = (TableLayout) me.context.findViewById(R.id.options_table_view);
+	        lp.startAnimation(anim);
+	        
 		}
 
 		
 	}
-
+	}
 	public class myDate{
     	Calendar date;
     	String human;
@@ -392,8 +416,9 @@ public class EditStatus extends medi_mouse_activity {
 			web_view.loadDataWithBaseURL(medi_post.BASE_URL, me.webview, 
 					"text/html", "", medi_post.SITE);
 			*/
-			finish();
+			
 		}
+		finish();
 	}
 
 		
