@@ -230,8 +230,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			c=c+"<td class=\"style9\">".length();
 			d = me.webview.indexOf("</td>", c);
 			
-			
-			if(e<d&&c<me.webview.length()){
+			if(e<d||c>=me.webview.length()){
 				events.add("No Events");
 				
 			} else {
