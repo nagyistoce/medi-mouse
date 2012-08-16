@@ -31,7 +31,7 @@ public class EditPreferences extends Activity {
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	boolean doreload = spref.getBoolean("reload_onresume", false);
+    	boolean enable_core = spref.getBoolean("enable_core", true);
     	boolean is_lss = spref.getBoolean("is_lss", false);
     	
     	final String lss_core_username = spref.getString("lss_core_username", "");
@@ -39,7 +39,7 @@ public class EditPreferences extends Activity {
     	
     	TextView username_view= (TextView) findViewById(R.id.username_view);
     	TextView password_view= (TextView) findViewById(R.id.password_view);
-        CheckBox doreload_view= (CheckBox) findViewById(R.id.reload_view);
+        CheckBox enable_core_view= (CheckBox) findViewById(R.id.enable_core_view);
         final CheckBox is_lss_view= (CheckBox) findViewById(R.id.is_lss_view);
         
         final LinearLayout lss_only_view = (LinearLayout) findViewById(R.id.lss_only);
@@ -105,7 +105,7 @@ public class EditPreferences extends Activity {
         
     	username_view.setText(username);
         password_view.setText(password);
-        doreload_view.setChecked(doreload);
+        enable_core_view.setChecked(enable_core);
         is_lss_view.setChecked(is_lss);
 		//addPreferencesFromResource(R.xml.prefs);
        
@@ -114,7 +114,7 @@ public class EditPreferences extends Activity {
 	public void onBackPressed(){
     	TextView username_view= (TextView) findViewById(R.id.username_view);
     	TextView password_view= (TextView) findViewById(R.id.password_view);
-        CheckBox doreload_view= (CheckBox) findViewById(R.id.reload_view);
+        CheckBox enable_core_view= (CheckBox) findViewById(R.id.enable_core_view);
         CheckBox is_lss_view= (CheckBox) findViewById(R.id.is_lss_view);
         String username="";
         for(int x = 0;x<username_view.getText().length();x++){
@@ -140,7 +140,7 @@ public class EditPreferences extends Activity {
 		
     	editor.putString("user_name", username);
     	editor.putString("user_password",password);
-    	editor.putBoolean("reload_onresume", doreload_view.isChecked());
+    	editor.putBoolean("enable_core", enable_core_view.isChecked());
     	editor.putBoolean("is_lss", is_lss_view.isChecked());
     	editor.commit();
     	

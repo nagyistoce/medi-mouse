@@ -72,7 +72,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	
+    	boolean enable_core = spref.getBoolean("enable_core", true);
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
@@ -123,8 +123,10 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         
         //screen refresh
-    	core_post cpost = new core_post(false);
-    	cpost.execute(me);
+        if(enable_core){
+        	core_post cpost = new core_post(false);
+        	cpost.execute(me);
+        }
     	
     	//----------------------------------------------------------------------------------------
     	    	
