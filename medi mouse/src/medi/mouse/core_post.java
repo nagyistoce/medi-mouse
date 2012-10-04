@@ -187,15 +187,17 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		if(params.length>0){
 			medi_person me = params[0];
 			//actual fix for issue 1 (the easy way)
-			me.webview="Failed to connect with core";
+			me.webview="Network Error: Failed to connect with core";
 			String user = me.is_lss?me.lss_core_username:me.username;
 			String pass = me.is_lss?me.lss_core_password:me.password;
 			try {
+				System.out.println(1);
 				String ret = doSubmit(this.mHttpClient,"POST",user,
 						pass,me.context);
 				me.webview=ret;
+				System.out.println(ret);
 			} catch (unauthorized e) {
-
+				System.out.println(2);
 				me.webview+=":  \nUsername/Password rejected";
 
 			}
@@ -217,7 +219,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		//parse file for event info:
 		
 		//check for errors
-		int t = me.webview.indexOf("Failed to connect with core");
+		int t = me.webview.indexOf("Network Error");
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
 		}else {
@@ -230,7 +232,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			c=c+"<td class=\"style9\">".length();
 			d = me.webview.indexOf("</td>", c);
 			
-			if(e<d||c>=me.webview.length()){
+			if(e<d||c>=me.webview.length()||c==-1||d==-1){
 				events.add("No Events");
 				
 			} else {

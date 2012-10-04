@@ -215,6 +215,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 			me.webview="Network Error";
 			
 			String ret = "";
+			/*
 			if(this.data.containsKey("TYPE")){
 				
 				try {
@@ -276,7 +277,7 @@ public class medi_post extends AsyncTask<medi_person,Integer,medi_person>{
 					//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 				}
 			}
-			
+			*/
 			return me;
 		}
 		return null;

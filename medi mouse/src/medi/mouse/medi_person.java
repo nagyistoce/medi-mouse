@@ -34,8 +34,8 @@ public class medi_person extends Activity{
 	 */
 
 	public Map<String, String> data = new HashMap<String, String>();
-	HttpClient client;
-	public String webview;
+	//HttpClient client;
+	public String webview="";
 	public String filelink;
 	public String imgfile;
 	String phone_ext;
@@ -81,7 +81,7 @@ public class medi_person extends Activity{
         lss_core_username = spref.getString("lss_core_username", "");
         lss_core_password = spref.getString("lss_core_password", "");
     	
-    	client = context.client;
+    	//client = context.client;
 		//trax_client = context.trax_client;
 		//core_client = context.core_client;
         data = new HashMap<String, String>();
@@ -116,7 +116,7 @@ public class medi_person extends Activity{
         lss_core_username = spref.getString("lss_core_username", "");
         lss_core_password = spref.getString("lss_core_password", "");
     	
-		client = context.client;
+		//client = context.client;
         data = new HashMap<String, String>();	    		
 	}
 	public medi_person(medi_mouse_activity context,

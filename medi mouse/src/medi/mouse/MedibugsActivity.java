@@ -2,19 +2,12 @@ package medi.mouse;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.acra.ErrorReporter;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ManagedClientConnection;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.net.http.SslError;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -22,26 +15,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.animation.AnimationUtils;
-import android.webkit.HttpAuthHandler;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-
- 
 public class MedibugsActivity extends medi_mouse_activity implements OnSharedPreferenceChangeListener{
 
 	TextView name_view;
@@ -76,7 +57,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
-    	client = medi_post.connect(username, password);
+    	//client = medi_post.connect(username, password);
 		
     	me = new medi_person(this);
     	
@@ -95,14 +76,14 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         v = this.getLayoutInflater().inflate(R.layout.menu, null);
         tv = (TextView) v.findViewById(R.id.name);
-        
+        /* no longer supported in coretrax
         tv.setText("Find Person");
         tv.setOnClickListener(new OnClickListener(){
 			public void onClick(View arg0) {
 				startActivity(new Intent(MedibugsActivity.this,FindPerson.class));
 			}});
         ll.addView(v, 1);
-        
+        */
         v = this.getLayoutInflater().inflate(R.layout.menu, null);
         tv = (TextView) v.findViewById(R.id.name);
         
@@ -111,17 +92,12 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 			public void onClick(View arg0) {
 				MedibugsActivity.this.reload();
 			}});
-        ll.addView(v, 2);
+        ll.addView(v, 1);
         
         Log.d("UI","-------------");
         final ArrayList<View> views = new ArrayList<View>();
         views.add(ll);
-        
-        
         Log.d("UI","views size:"+views.size());
-        
-        
-        
         //screen refresh
         if(enable_core){
         	core_post cpost = new core_post(false);
@@ -130,19 +106,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	//----------------------------------------------------------------------------------------
     	    	
-    	/*
-    	picture.setOnClickListener(new picture_listener());
-    	File imageFile = new File(me.imgfile);
-    	
-    	System.out.println("imgfile: "+me.imgfile);
-		if(imageFile.exists()){
-			
-			System.out.println("displaying picture");
-			//Bitmap myBitmap = BitmapFactory.decodeFile(me.imgfile);
-			
-			//picture.setImageBitmap(myBitmap);
-		}
-		*/
+
     	
     }
         
@@ -152,39 +116,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	//medi_post.disconnect(client);
     	super.onDestroy();
     }
-    /**
-     * picture_listener
-     * @author will
-     * Does not work!  There is something wrong with meditech's webserver
-     * and my download requests are not working.  I kept getting file not
-     * found exceptions or html files instead of the jpg I requested.  
-     * 
-     * I tested with another remote jpg file and it pulled in just fine,
-     * so thats why I think its a problem with the server.
-     */
-    class picture_listener implements OnClickListener{
-
-		public void onClick(View arg0) {
-			if(me.imglink!=null){
-				/*
-				String filelink = me.username+".jpg";
-				ImageManager.DownloadFromUrl(medi_post.SITE_IMG_DIR+"/"+me.imglink,filelink);
-				SharedPreferences spref=
-						PreferenceManager.getDefaultSharedPreferences(me.context);
-				SharedPreferences.Editor editor = spref.edit();
-				editor.putString("imgfile", "/sdcard/data/medi.mouse/"+filelink);
-				editor.commit();
-				File imageFile = new File(filelink);
-				if(imageFile.exists()){
-					Bitmap myBitmap = BitmapFactory.decodeFile("/sdcard/data/medi.mouse/"+filelink);
-					ImageView myImage = (ImageView) findViewById(R.id.picture_view);
-					myImage.setImageBitmap(myBitmap);
-				}
-				*/
-			}
-		}
-    	
-    }
+ 
     /**
      * full reload.  Creates new connection with the server and requests current state.
      */
@@ -193,30 +125,15 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
 		String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
-    	System.out.println("user "+username);
-    	//release lock when you close connection
-    	me.network_lock = false;
-    	System.out.println("aborting...");
-    	//client.getConnectionManager().shutdown();
-    	client = medi_post.connect(username, password);
-    	me.client=client;
-    	medi_post postme;
     	
-    	System.out.println("stafflink: "+me.stafflink);
+    	coretrax_post trax_post;
     	
-    	if (!me.hasStafflink()||
-    			me.username!=username){
-    		System.out.println("no stafflink");
-    		me.stafflink=null;
-    		me.username=username;
-    		me.data = new HashMap<String, String>();
-    		postme = new medi_post(me.data,me.is_lss);
-    		postme.execute(me);
-    	} else {	
-			me.secondaryLoad();
-			postme = new medi_post(me.data,me.is_lss);
-	    	postme.execute(me);
-    	}
+    	me.username=username;
+		me.password=password;
+		
+		trax_post = new coretrax_post();
+		trax_post.execute(me);
+		reload(1);
 	}
     @Override
     public void onResume(){
@@ -313,26 +230,6 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 	@Override
 	public void onPostExecute(medi_person result) {
 		me = result;
-
-		//double fix for issue 1
-		if(me!=null&&me.webview!=null){
-			
-			SharedPreferences spref=
-					PreferenceManager.getDefaultSharedPreferences(me.context);
-			SharedPreferences.Editor editor = spref.edit();
-			editor.putString("full_name", me.full_name);
-			editor.putString("status", me.status);
-			editor.putString("date", me.date);
-			if(me.hasStafflink()){
-				editor.putString("stafflink",me.stafflink);
-			} else {
-				//editor.putString("stafflink","");
-				//
-			}
-			editor.putString("imglink",me.imglink);
-			editor.commit();
-			
-		}
 
 		reload(1);
 		

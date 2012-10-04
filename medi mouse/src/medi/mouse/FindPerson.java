@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import medi.mouse.EditStatus.menu_node;
-import medi.mouse.EditStatus.myDate;
+
 
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -38,7 +38,7 @@ public class FindPerson extends medi_mouse_activity {
 	private static final long TRANS_DUR = 1000;
 	menu_node root,current;
 	
-	ArrayList<myDate> inputDates;
+	
 	String stafflink,myStafflink;
 	private TextView tv;
 	public void onCreate(Bundle savedInstanceState) {

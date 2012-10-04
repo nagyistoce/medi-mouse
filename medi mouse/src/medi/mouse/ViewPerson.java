@@ -42,7 +42,7 @@ public class ViewPerson extends medi_mouse_activity {
     	client = medi_post.connect(username, password);
 		
     	me = new medi_person(this,stafflink,myStafflink);
-    	me.client = client;
+    	//me.client = client;
     	me.data = new HashMap<String, String>();
     	me.data.put("stafflink", stafflink);
     	me.data.put("TYPE", "ViewUser");
