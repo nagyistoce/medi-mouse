@@ -182,6 +182,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 			next = file.indexOf("<td",t1);
 		}
 		root_menu.put("in",in);
+		//--------------------------------------------------------------
 		//bldg-div
 		t1 = file.indexOf("z0-b-0-4-2-0");
 		t1 = file.indexOf(">",t1)+1;
@@ -276,83 +277,60 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		editor.putString("full_name", root_menu.menu.get("name").value);
 		editor.putString("status", root_menu.menu.get("primary_status").value);
 		editor.putString("date", root_menu.menu.get("secondary_status").value);
+		me.webview="success!";
 		editor.commit(); 
 		
 		if(this.info.size()==3){
 			HttpPost post;
 			Log.d("coretrax_post","submiting...");
-			Log.d("coretrax_post","::"+this.info.get(0).toCharArray()[0]+":"+"in".toCharArray()[0]+
-					(this.info.get(0).charAt(0)=="in".toCharArray()[0]));
+			
 			Log.d("coretrax_post",this.info.get(1));
 			Log.d("coretrax_post",this.info.get(2));
 			try {
 				String link;
 				if(this.info.get(0).charAt(0)=="in".charAt(0)) {
 					link = this.root_menu.menu.get("in").menu.get(this.info.get(1)).link;
+					Log.d("coretrax_post","link:"+link);
 					post = new HttpPost(link);
 					HttpResponse response = mHttpClient.execute(post, mHttpContext);
-					
-					BufferedReader in = new BufferedReader(
-							new InputStreamReader(response.getEntity().getContent()));
-					String line,file;
-					file = "";
-					while((line=in.readLine())!=null) {
-						file += line;				
-					}
 					response.getEntity().consumeContent();
-					Log.d("coretrax_post","link:"+link);
-					Log.d("coretrax_post","file:"+file);
+					
 					
 					link = this.root_menu.menu.get("bldg").menu.get(this.info.get(2)).link;
-					response = mHttpClient.execute(post, mHttpContext);
-					
-					in = new BufferedReader(
-							new InputStreamReader(response.getEntity().getContent()));
-					file = "";
-					while((line=in.readLine())!=null) {
-						file += line;				
-					}
-					response.getEntity().consumeContent();
 					Log.d("coretrax_post","link:"+link);
-					Log.d("coretrax_post","file:"+file);
-					
+					post = new HttpPost(link);
+					response = mHttpClient.execute(post, mHttpContext);
 					response.getEntity().consumeContent();
+					
 				}else if (this.info.get(0).charAt(0)=="out".charAt(0)) {
 					link = this.root_menu.menu.get("out").menu.get(this.info.get(1)).link;
+					Log.d("coretrax_post","link:"+link);
 					post = new HttpPost(link);
 					HttpResponse response = mHttpClient.execute(post, mHttpContext);
 					response.getEntity().consumeContent();
+					
+					
 					link = this.root_menu.menu.get("date").menu.get(this.info.get(2)).link;
+					Log.d("coretrax_post","link:"+link);
+					post = new HttpPost(link);
 					response = mHttpClient.execute(post, mHttpContext);
 					response.getEntity().consumeContent();
+					
 				}
 				link = this.root_menu.menu.get("save").link;
+				Log.d("coretrax_post","link:"+link);
 				post = new HttpPost(link);
 				HttpResponse response = mHttpClient.execute(post, mHttpContext);
-				
+				response.getEntity().consumeContent();
 
-				BufferedReader in = new BufferedReader(
-						new InputStreamReader(response.getEntity().getContent()));
-				String file = "",line;
-				while((line=in.readLine())!=null) {
-					file += line;				
-				}
-				response.getEntity().consumeContent();
-				Log.d("coretrax_post","link:"+link);
-				Log.d("coretrax_post","file:"+file);
-				
-				
-				response.getEntity().consumeContent();
-				
 				me.status = this.info.get(1);
 				me.date = this.info.get(2);
+				me.webview = "core trax status saved!";
 				return me;
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				me.webview = "Network Error: "+e.getMessage();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				me.webview = "Network Error: "+e.getMessage();
 			}
 			
 		}
@@ -372,7 +350,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
 		}else {
-			Toast.makeText(me.context, "connected to core", Toast.LENGTH_SHORT).show();
+			Toast.makeText(me.context, me.webview, Toast.LENGTH_SHORT).show();
 		}
         me.context.onPostExecute(me);
 	}
