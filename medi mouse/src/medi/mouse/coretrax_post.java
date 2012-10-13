@@ -24,6 +24,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.BasicHttpContext;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -261,6 +263,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 			getAuth(me.username,me.password);
 		} catch (unauthorized e) {
 			me.webview = "Network Error: Unauthorized (username/password rejected)";
+			
 			return me;
 		} catch (IllegalStateException e) {
 			me.webview = "Network Error: "+e.getMessage();
@@ -349,6 +352,10 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
         int t = me.webview.indexOf("Network Error");
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
+			if(me.webview.contains("Unauthorized")){
+				me.context.startActivity(new Intent(me.context, EditPreferences.class));
+			}
+			
 		}else {
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_SHORT).show();
 		}

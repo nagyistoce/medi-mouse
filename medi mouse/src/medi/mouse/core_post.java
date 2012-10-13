@@ -198,7 +198,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 				System.out.println(ret);
 			} catch (unauthorized e) {
 				System.out.println(2);
-				me.webview+=":  \nUsername/Password rejected";
+				me.webview+=":  Unauthorized \nUsername/Password rejected";
 
 			}
 			return me;
@@ -222,6 +222,9 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		int t = me.webview.indexOf("Network Error");
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
+			if(me.webview.contains("Unauthorized")){
+				me.context.startActivity(new Intent(me.context, EditPreferences.class));
+			}
 		}else {
 			Toast.makeText(me.context, "connected to core", Toast.LENGTH_SHORT).show();
 

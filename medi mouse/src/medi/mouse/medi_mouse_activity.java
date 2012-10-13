@@ -1,8 +1,6 @@
 package medi.mouse;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ManagedClientConnection;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 
