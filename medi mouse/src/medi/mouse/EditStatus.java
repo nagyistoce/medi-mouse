@@ -37,7 +37,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class EditStatus extends medi_mouse_activity {
 	static int TRANS_START=800;
-	static int TRANS_DUR=500;
+	static int TRANS_DUR=100;
 	menu_node root,current;
 	protected boolean one_shot=false;
 	protected coretrax_post trax_post;
@@ -150,17 +150,11 @@ public class EditStatus extends medi_mouse_activity {
 	        for(int d = 0;d<options.length;d++){
 	        	Log.d("EditStatus",options[d]);
 	        }
-			TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
-		    anim.setDuration(EditStatus.TRANS_DUR);
-		    anim.setFillAfter(true);
-		    
-	        TableLayout lp = (TableLayout) me.context.findViewById(R.id.options_table_view);
-	        lp.startAnimation(anim);
+			
 	        
-        
-        
 	        LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
 	        ll.removeAllViews();
+	        
 	        
 	        for (int x=0;x<this.options.length;x++){
 	        	
@@ -188,10 +182,24 @@ public class EditStatus extends medi_mouse_activity {
 				}
 		        ll.addView(v, x);
 		        
+		        
 	        }
 	        
-		        					
-			
+	        
+	        
+	        TranslateAnimation anim = new TranslateAnimation(EditStatus.TRANS_START, 0, 0, 0);
+		    anim.setDuration(EditStatus.TRANS_DUR);
+	        //anim.setDuration(100);
+		    anim.setFillAfter(true);
+		    
+	        TableLayout lp = (TableLayout) me.context.findViewById(R.id.options_table_view);
+	        lp.refreshDrawableState();
+	        lp.startAnimation(anim);
+	        
+	        Log.d("EditStatus","refresh screen");
+	        
+	        
+	        
 		}
 		
 	
