@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item android:id="@+id/signinout"
+    	  android:showAsAction="always|withText"
+          android:title="in/out" />
+	
+    <item android:id="@+id/settings"
+    	  android:showAsAction="always|withText"
+          android:title="Settings" />
+    <item android:id="@+id/helpabout"
+    	  android:showAsAction="always|withText"
+          android:title="Help/About" />
+    <item android:id="@+id/core"
+    	  android:showAsAction="ifRoom|withText"
+          android:title="Core (coming soon)" />
+</menu>

@@ -3,16 +3,20 @@ package medi.mouse;
 
 import java.util.ArrayList;
 import org.acra.ErrorReporter;
+
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +34,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 	TextView date_view;
 	ImageView picture;
 	String status_message="";
+	private boolean reloading;
 	
 	
 	
@@ -38,11 +43,10 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     public void onCreate(Bundle savedInstanceState) {
     	
         
-       super.onCreate(savedInstanceState);
-        
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.view_user);
-        //medi_post.setConnectionManager();
+    	super.onCreate(savedInstanceState);
+    	setContentView(R.layout.view_user);
+		
+	    //	medi_post.setConnectionManager();
         
         
         //------------------------------------------------------------------------------------------
@@ -67,38 +71,23 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         ll.removeAllViews();
         View v = this.getLayoutInflater().inflate(R.layout.menu, null);
         TextView tv = (TextView) v.findViewById(R.id.name);
-        tv.setText("Sign In/Out");
-        tv.setOnClickListener(new OnClickListener(){
-			public void onClick(View arg0) {
-				startActivity(new Intent(MedibugsActivity.this,EditStatus.class));
-			}});
-        ll.addView(v, 0);
-        
-        v = this.getLayoutInflater().inflate(R.layout.menu, null);
-        tv = (TextView) v.findViewById(R.id.name);
-        /* no longer supported in coretrax
-        tv.setText("Find Person");
-        tv.setOnClickListener(new OnClickListener(){
-			public void onClick(View arg0) {
-				startActivity(new Intent(MedibugsActivity.this,FindPerson.class));
-			}});
-        ll.addView(v, 1);
-        */
-        v = this.getLayoutInflater().inflate(R.layout.menu, null);
-        tv = (TextView) v.findViewById(R.id.name);
         
         tv.setText("Refresh");
+        
         tv.setOnClickListener(new OnClickListener(){
 			public void onClick(View arg0) {
-				MedibugsActivity.this.reload();
+				if(!MedibugsActivity.this.reloading){
+					
+					MedibugsActivity.this.reload();
+				}
 			}});
-        ll.addView(v, 1);
         
-        Log.d("UI","-------------");
-        final ArrayList<View> views = new ArrayList<View>();
-        views.add(ll);
-        Log.d("UI","views size:"+views.size());
+        ll.addView(v, 0);
+        ll.forceLayout();
+        
         //screen refresh
+        
+        reload();
         if(enable_core){
         	core_post cpost = new core_post(false);
         	cpost.execute(me);
@@ -132,6 +121,11 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 		me.password=password;
 		
 		trax_post = new coretrax_post();
+		this.reloading = true;
+		LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+        TextView tv = (TextView) ll.getChildAt(0).findViewById(R.id.name);
+        tv.setTextColor(Color.GRAY);
+        
 		trax_post.execute(me);
 		reload(1);
 	}
@@ -177,60 +171,15 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 	 * 
 	 * 
 	 */
-        @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, 0, 0, "settings");
-        menu.add(Menu.NONE, 1, 1, "about");
-        return super.onCreateOptionsMenu(menu);
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case 0:
-                startActivity(new Intent(this, EditPreferences.class));
-                return true;
-            case 1:
-                LayoutInflater inflater = LayoutInflater.from(MedibugsActivity.this);
-
-                // error here
-                View alertDialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
-
-                WebView myWebView = (WebView) alertDialogView.findViewById(R.id.DialogWebView);
-                
-                myWebView.loadUrl("file:///android_asset/help_about.html");  
-                AlertDialog.Builder builder = new AlertDialog.Builder(MedibugsActivity.this);
-                Button report = (Button) alertDialogView.findViewById(R.id.crash_report);
-                builder.setView(alertDialogView);
-                report.setOnClickListener(new OnClickListener(){
-
-					public void onClick(View arg0) {
-						ErrorReporter.getInstance().handleException(
-								new Exception("haha, I found an error"));
-						
-					}});
-               
-               builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                }).show();
-               	//alertDialogView.requestLayout();
-            	return true;
-        }
-        return false;
-    }
-
-	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
-		
-		boolean is_lss = spref.getBoolean("is_lss", false);
-    	
-		me.is_lss = is_lss;
-	}
-
-	@Override
+    	@Override
 	public void onPostExecute(medi_person result) {
 		me = result;
-
+		if(reloading){
+			reloading=false;
+			LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
+			TextView tv = (TextView) ll.getChildAt(0).findViewById(R.id.name);
+	        tv.setTextColor(Color.BLACK);
+		}
 		reload(1);
 		
 	}

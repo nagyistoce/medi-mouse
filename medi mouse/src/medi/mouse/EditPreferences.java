@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-public class EditPreferences extends Activity {
+public class EditPreferences extends medi_mouse_activity {
 	
 	public void onCreate(Bundle savedInstanceState) {
 		
@@ -32,81 +32,14 @@ public class EditPreferences extends Activity {
     	String username = spref.getString("user_name", "");
     	String password = spref.getString("user_password","");
     	boolean enable_core = spref.getBoolean("enable_core", true);
-    	boolean is_lss = spref.getBoolean("is_lss", false);
-    	
-    	final String lss_core_username = spref.getString("lss_core_username", "");
-    	final String lss_core_password = spref.getString("lss_core_password", "");
     	
     	TextView username_view= (TextView) findViewById(R.id.username_view);
     	TextView password_view= (TextView) findViewById(R.id.password_view);
         CheckBox enable_core_view= (CheckBox) findViewById(R.id.enable_core_view);
-        final CheckBox is_lss_view= (CheckBox) findViewById(R.id.is_lss_view);
-        
-        final LinearLayout lss_only_view = (LinearLayout) findViewById(R.id.lss_only);
-        Log.d("EditPreferences","lss ui 1"+is_lss_view.isChecked());
-        if (is_lss){
-        	
-        	lss_only_view.setVisibility(View.VISIBLE);
-			TableLayout tl = (TableLayout) findViewById(R.id.lss_core_view);
-			tl.removeAllViews();
-			
-			TextView label = new TextView(EditPreferences.this);
-			label.setText("LSS core credentials");
-			
-			tl.addView(label, 0);
-			EditText et = new EditText(EditPreferences.this);
-			et.setText(lss_core_username);
-			
-			tl.addView(et, 1);
-			
-
-			et = new EditText(EditPreferences.this);
-			et.setText(lss_core_password);
-			//et.setTransformationMethod(new PasswordTransformationMethod());
-			//et.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-			et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-			tl.addView(et, 2);
-        }else{
-        	lss_only_view.setVisibility(View.GONE);
-        }
-        is_lss_view.setOnClickListener(new OnClickListener(){
-
-			public void onClick(View v) {
-				if (is_lss_view.isChecked()){
-					lss_only_view.setVisibility(View.VISIBLE);
-					TableLayout tl = (TableLayout) findViewById(R.id.lss_core_view);
-					tl.removeAllViews();
-					
-					TextView label = new TextView(EditPreferences.this);
-					label.setText("LSS core credentials");
-					
-					tl.addView(label, 0);
-					EditText et = new EditText(EditPreferences.this);
-					et.setText(lss_core_username);
-					
-					tl.addView(et, 1);
-					
-
-					et = new EditText(EditPreferences.this);
-					et.setText(lss_core_password);
-					//et.setTransformationMethod(new PasswordTransformationMethod());
-					//et.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-					et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-					tl.addView(et, 2);
-				} else {
-					lss_only_view.setVisibility(View.GONE);
-				}
-				
-					
-				
-			}
-        	
-        });
-        
-    	username_view.setText(username);
+            	username_view.setText(username);
         password_view.setText(password);
         enable_core_view.setChecked(enable_core);
-        is_lss_view.setChecked(is_lss);
+        
 		//addPreferencesFromResource(R.xml.prefs);
        
 	}
@@ -115,7 +48,6 @@ public class EditPreferences extends Activity {
     	TextView username_view= (TextView) findViewById(R.id.username_view);
     	TextView password_view= (TextView) findViewById(R.id.password_view);
         CheckBox enable_core_view= (CheckBox) findViewById(R.id.enable_core_view);
-        CheckBox is_lss_view= (CheckBox) findViewById(R.id.is_lss_view);
         String username="";
         for(int x = 0;x<username_view.getText().length();x++){
         	username+=username_view.getText().charAt(x);
@@ -128,25 +60,20 @@ public class EditPreferences extends Activity {
         SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
         Editor editor = spref.edit();
         
-        TableLayout tl = (TableLayout) findViewById(R.id.lss_core_view);
-        if(tl.getChildCount()==3){
-        	EditText et = (EditText) tl.getChildAt(1);
-        	String lss_core_username = et.getText().toString();
-        	String lss_core_password = ((EditText) tl.getChildAt(2)).getText().toString();
-        	
-        	editor.putString("lss_core_username", lss_core_username);
-        	editor.putString("lss_core_password", lss_core_password);
-        }
-		
+        
     	editor.putString("user_name", username);
     	editor.putString("user_password",password);
     	editor.putBoolean("enable_core", enable_core_view.isChecked());
-    	editor.putBoolean("is_lss", is_lss_view.isChecked());
     	editor.commit();
     	
     	
 	
 		super.onBackPressed();
+		
+	}
+	@Override
+	public void onPostExecute(medi_person result) {
+		// TODO Auto-generated method stub
 		
 	}
 

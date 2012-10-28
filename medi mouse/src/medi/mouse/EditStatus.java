@@ -37,7 +37,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class EditStatus extends medi_mouse_activity {
 	static int TRANS_START=800;
-	static int TRANS_DUR=100;
+	static int TRANS_DUR=300;
 	menu_node root,current;
 	protected boolean one_shot=false;
 	protected coretrax_post trax_post;
@@ -45,13 +45,12 @@ public class EditStatus extends medi_mouse_activity {
 	public void onCreate(Bundle savedInstanceState) {
 			
 	        super.onCreate(savedInstanceState);
-	        requestWindowFeature(Window.FEATURE_NO_TITLE);
 	        setContentView(R.layout.view_user);   
-	        String username,stafflink,full_name,status,mydate;
+	        String username,full_name,status,mydate;
 	        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
 	        
 	        username = spref.getString("user_name", "");
-	    	stafflink = spref.getString("stafflink", "");
+
 	    	String password = spref.getString("user_password","");
 	    	
 	        me = new medi_person(this,1);

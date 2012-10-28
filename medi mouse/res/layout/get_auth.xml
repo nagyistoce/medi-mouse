@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="fill_parent" 
-    android:layout_width="fill_parent">
+    android:layout_width="fill_parent"
+    android:textColor="@color/theme_color">
 
 <LinearLayout 
     android:id="@+id/header"
@@ -11,9 +12,7 @@
  <TableLayout 
     	android:id="@+id/table_view"
    		android:layout_width="fill_parent"
-   
  		android:layout_height="wrap_content"
-
  		android:background="@drawable/shape">
  
  <TableLayout
@@ -27,11 +26,13 @@
  		android:layout_marginTop="15px">		
     <EditText
         android:id="@+id/username_view"
+        android:textColor="@color/theme_color"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
 
     <EditText
         android:id="@+id/password_view"
+        android:textColor="@color/theme_color"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:inputType="textPassword" >
@@ -40,10 +41,8 @@
 
 <CheckBox
 	android:id="@+id/enable_core_view"
+	android:textColor="@color/theme_color"
 	android:text="enable core"/>
-<CheckBox
-	android:id="@+id/is_lss_view"
-	android:text="I'm LSS"/>
 </TableLayout>
 </TableLayout>
 
@@ -51,22 +50,6 @@
 	android:layout_width="fill_parent"
 	android:layout_height="30dp">
 </View>
-
-<LinearLayout 
-    android:id="@+id/lss_only"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" 
- 	android:background="@drawable/shape">
-
- <TableLayout 
-    android:id="@+id/lss_core_view"
-	android:layout_marginLeft="15px"
- 	android:layout_marginBottom="15px"
- 	android:layout_marginRight="15px"
- 	android:layout_marginTop="15px">
- </TableLayout>
-
-</LinearLayout>
 
 </LinearLayout>
 </ScrollView>
