@@ -76,7 +76,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		super.execute(me);
 	}
 	private boolean getAuth(String username,
-			String password) throws unauthorized, IllegalStateException, IOException{
+			String password) throws unauthorized, IllegalStateException, IOException, coreParserError{
 
 		
 		
@@ -123,7 +123,10 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 				file.contains("Missing field(s)")){
 			throw new unauthorized();
 		}
-		menu_node d = parse_info(file);
+		
+		menu_node d;
+		d = parse_info(file);
+		
 		
 		Log.d("coretrax_post",file);
 		Log.d("coretrax_post",d.menu.get("name").value);
@@ -135,13 +138,16 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		
 		return true;
 	}
-	private menu_node parse_info(String file) {
+	private menu_node parse_info(String file) throws coreParserError {
 		 
 		
 		//name
 		int t1 = file.indexOf("z0-b-0-2-0-0_0s");
 		t1 = file.indexOf(">",t1)+1;
 		int t2 = file.indexOf("<",t1);
+		if(t1==-1||t2==-1){
+			throw new coreParserError(file);
+		}
 		root_menu.put("name", new menu_node("",file.substring(t1,t2)));
 		
 		//status
@@ -271,6 +277,9 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		} catch (IOException e) {
 			me.webview = "Network Error: "+e.getMessage();
 			return me;
+		} catch (coreParserError e) {
+			me.webview = "Error connecting to core: "+e.getMessage();
+			return me;
 		}
 		
 		SharedPreferences spref=
@@ -349,8 +358,8 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
         
         lp.removeViewAt(0);
         
-        int t = me.webview.indexOf("Network Error");
-		if(t!=-1&&t<10){
+        int t = me.webview.indexOf("Error");
+		if(t!=-1&&t<20){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
 			if(me.webview.contains("Unauthorized")){
 				me.context.startActivity(new Intent(me.context, EditPreferences.class));
@@ -384,6 +393,13 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}
 		}
 		
+		
+	}
+	class coreParserError extends Exception{
+
+		public coreParserError(String file) {
+			super(file);
+		}
 		
 	}
   
