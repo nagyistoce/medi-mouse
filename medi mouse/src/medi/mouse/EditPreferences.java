@@ -45,7 +45,17 @@ public class EditPreferences extends medi_mouse_activity {
 	}
 	@Override
 	public void onBackPressed(){
-    	TextView username_view= (TextView) findViewById(R.id.username_view);
+		commitChanges();
+    	super.onBackPressed();
+	}
+	@Override
+	public void onPause(){
+		commitChanges();
+    	super.onPause();
+	}
+	
+	private void commitChanges(){
+		TextView username_view= (TextView) findViewById(R.id.username_view);
     	TextView password_view= (TextView) findViewById(R.id.password_view);
         CheckBox enable_core_view= (CheckBox) findViewById(R.id.enable_core_view);
         String username="";
@@ -65,11 +75,11 @@ public class EditPreferences extends medi_mouse_activity {
     	editor.putString("user_password",password);
     	editor.putBoolean("enable_core", enable_core_view.isChecked());
     	editor.commit();
-    	
-    	
-	
-		super.onBackPressed();
-		
+    	Log.d("EditPreferences","committing changes");
+	}
+	@Override
+	public void onDetachedFromWindow(){
+		commitChanges();
 	}
 	@Override
 	public void onPostExecute(medi_person result) {
