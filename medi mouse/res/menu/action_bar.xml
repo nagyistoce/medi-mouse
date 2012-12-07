@@ -12,5 +12,5 @@
           android:title="Help/About" />
     <item android:id="@+id/core"
     	  android:showAsAction="ifRoom|withText"
-          android:title="Core (coming soon)" />
+          android:title="Core" />
 </menu>
