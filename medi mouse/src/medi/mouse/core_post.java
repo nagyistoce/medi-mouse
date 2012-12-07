@@ -72,6 +72,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	public static String SITE = "https://core.meditech.com/core-coreWebHH.desktop.mthh";
 	public static String SITE2= "https://core.meditech.com/signon.mthz";
+	public static String BASE = "https://core.meditech.com/";
 
 	private Map<String,String> data;
 	private boolean is_lss = false;
@@ -161,7 +162,28 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			while((line=in.readLine())!=null) {
 				file += line;				
 			}
+			response.getEntity().consumeContent();
+			int t1 = file.indexOf("./Images\\HHIcon_LogOutBig.png")-40;
+			t1 = file.indexOf("href=\"./",t1)+8;
+			int t2 = file.indexOf("\"",t1);
+			String logout = file.substring(t1,t2);
+			post = new HttpPost(BASE+logout);
+			response = client.execute(post, mHttpContext);
+			
+			
+			in = new BufferedReader(
+					new InputStreamReader(response.getEntity().getContent()));
+			
 
+			String file2 = "";
+			while((line=in.readLine())!=null) {
+				file2 += line;				
+			}
+			response.getEntity().consumeContent();
+			Log.d("core_post","logout link"+ BASE+logout);
+			Log.d("core_post","logout link"+ file2);
+
+			
 			if(file.contains("Invalid username/password")||
 					file.contains("Missing field(s)")){
 				throw new unauthorized();

@@ -2,6 +2,7 @@ package medi.mouse;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -46,7 +47,10 @@ public class EditPreferences extends medi_mouse_activity {
 	@Override
 	public void onBackPressed(){
 		commitChanges();
-    	super.onBackPressed();
+		Intent intent = new Intent(this, MedibugsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    
 	}
 	@Override
 	public void onPause(){

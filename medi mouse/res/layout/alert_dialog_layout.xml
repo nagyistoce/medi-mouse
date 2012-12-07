@@ -6,6 +6,6 @@ android:orientation="vertical">
 
 <Button
     android:id="@+id/crash_report"
-    android:text="Haha, I found an error!" />
+    android:text="report a bug" />
 
 </LinearLayout>
