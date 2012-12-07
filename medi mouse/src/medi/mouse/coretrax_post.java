@@ -42,6 +42,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 	private static String BASE = "http://core.meditech.com";
 	private Map<String,String> data;
 	private ArrayList<String> info = new ArrayList<String>();
+	private boolean logout = false;
 	public static ClientConnectionManager CM=null;
 	public menu_node root_menu = new menu_node("","");
 	BasicHttpContext mHttpContext;
@@ -62,6 +63,12 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 	public void postthis(ArrayList<String> info,medi_person me){
 		this.info = info;
 		this.execute(me);
+	}
+	public void execute(medi_person me,boolean logout){
+		this.logout=logout;
+		this.execute(me);
+				
+				
 	}
 	public void execute(medi_person me){
 		//add loading image to layout
@@ -89,7 +96,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		
 		HttpPost post;
 		post = new HttpPost(POST_AUTH);
-
+		
 
 		List<NameValuePair> nameValuePairs = 
 				new ArrayList<NameValuePair>(2);
@@ -128,7 +135,7 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		d = parse_info(file);
 		
 		
-		Log.d("coretrax_post",file);
+		//Log.d("coretrax_post",file);
 		Log.d("coretrax_post",d.menu.get("name").value);
 		Log.d("coretrax_post",d.menu.get("primary_status").value);
 		Log.d("coretrax_post",d.menu.get("secondary_status").value);
@@ -256,6 +263,8 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		Log.d("coretrax_post",t1+":"+t2);
 		root_menu.menu.put("save", new menu_node(file.substring(t1,t2),""));
 		
+		
+		Log.d("coretrax_post", file.substring(1200));
 		return root_menu;
 	}
 
@@ -295,8 +304,10 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 		me.webview="success!";
 		editor.commit(); 
 		
+		HttpPost post;
+		
 		if(this.info.size()==3){
-			HttpPost post;
+			
 			Log.d("coretrax_post","submiting...");
 			
 			Log.d("coretrax_post",this.info.get(1));
@@ -348,6 +359,33 @@ public class coretrax_post extends AsyncTask<medi_person,Integer,medi_person>{
 				me.webview = "Network Error: "+e.getMessage();
 			}
 			
+		} else {
+			//if not posting new status, hit save to logout
+			String link = this.root_menu.menu.get("save").link;
+			Log.d("coretrax_post","link:"+link);
+			post = new HttpPost(link);
+			HttpResponse response;
+			try {
+				response = mHttpClient.execute(post, mHttpContext);
+				String file = "";
+				String line = "";
+
+				//webview.setHttpAuthUsernamePassword(SITE, "meditech.com", username, password);
+				//webview.postUrl(SITE, EncodingUtils.getBytes(post_data, "BASE64"));
+
+				BufferedReader in = new BufferedReader(
+						new InputStreamReader(response.getEntity().getContent()));
+				
+				while((line=in.readLine())!=null) {
+					file += line;				
+				}
+				Log.d("coretrax_post","log out: "+file);
+				response.getEntity().consumeContent();
+			} catch (ClientProtocolException e) {
+				me.webview = "Network Error: "+e.getMessage();
+			} catch (IOException e) {
+				me.webview = "Network Error: "+e.getMessage();
+			}
 		}
 		return me;
 	}

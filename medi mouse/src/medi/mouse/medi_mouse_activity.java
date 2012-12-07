@@ -88,6 +88,12 @@ public abstract class medi_mouse_activity extends Activity {
         return false;
     }
 
+    @Override
+    public void onBackPressed(){
+    	Intent intent = new Intent(this, MedibugsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
 	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
 		
 		boolean is_lss = spref.getBoolean("is_lss", false);
