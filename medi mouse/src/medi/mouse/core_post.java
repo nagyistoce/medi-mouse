@@ -164,26 +164,27 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}
 			response.getEntity().consumeContent();
 			int t1 = file.indexOf("./Images\\HHIcon_LogOutBig.png")-40;
-			t1 = file.indexOf("href=\"./",t1)+8;
-			int t2 = file.indexOf("\"",t1);
-			String logout = file.substring(t1,t2);
-			post = new HttpPost(BASE+logout);
-			response = client.execute(post, mHttpContext);
-			
-			
-			in = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent()));
-			
+			if(t1>0){
+				t1 = file.indexOf("href=\"./",t1)+8;
+				int t2 = file.indexOf("\"",t1);
+				String logout = file.substring(t1,t2);
+				post = new HttpPost(BASE+logout);
+				response = client.execute(post, mHttpContext);
+				
+				
+				in = new BufferedReader(
+						new InputStreamReader(response.getEntity().getContent()));
+				
+	
+				String file2 = "";
+				while((line=in.readLine())!=null) {
+					file2 += line;				
+				}
+				response.getEntity().consumeContent();
+				Log.d("core_post","logout link"+ BASE+logout);
+				Log.d("core_post","logout link"+ file2);
 
-			String file2 = "";
-			while((line=in.readLine())!=null) {
-				file2 += line;				
 			}
-			response.getEntity().consumeContent();
-			Log.d("core_post","logout link"+ BASE+logout);
-			Log.d("core_post","logout link"+ file2);
-
-			
 			if(file.contains("Invalid username/password")||
 					file.contains("Missing field(s)")){
 				throw new unauthorized();
@@ -245,7 +246,8 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
 			if(me.webview.contains("Unauthorized")){
-				me.context.startActivity(new Intent(me.context, EditPreferences.class));
+				//coretrax_post will start this activity
+				//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 			}
 		}else {
 			Toast.makeText(me.context, "connected to core", Toast.LENGTH_SHORT).show();
