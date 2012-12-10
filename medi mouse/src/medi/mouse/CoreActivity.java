@@ -50,19 +50,19 @@ public class CoreActivity extends medi_mouse_activity {
 		 * download schematics
 		 * extract zips
 		 */
-		File appDir = new File(PATH);
+		File appDir = new File(PATH+"schematics");
 		
 		appDir.mkdirs();
 		File[] files = appDir.listFiles();
 		boolean found = false;
-		Log.d("CoreActivity","files "+files[0]);
-		if(files!=null){
+		
+		if(files!=null&&files.length>0){
+			Log.d("CoreActivity","files "+files[0]);
 			for(File f : files){
 				
 				Log.d("CoreActivity",f.getName());
-				if(f.getName().compareTo("Framingham.zip")==0){
+				if(f.getName().compareTo("Framingham")==0){
 					found=true;
-					extract(f);
 				}
 				
 			}
@@ -71,9 +71,15 @@ public class CoreActivity extends medi_mouse_activity {
 			Log.d("CoreActivity","downloading...");
 			Downloader dl = new Downloader(this, 
 					"https://medi-mouse.googlecode.com/files/Framingham.zip", 
-					new File(appDir+"/Framingham.zip"));
+					new File(PATH+"/Framingham.zip"));
 			dl.execute(0);
+		} else {
+			buildUI();
 		}
+				
+	}
+	
+	public void buildUI(){
 		buildFacSpinners(PATH + "schematics");
 		Button load = (Button) findViewById(R.id.load);
 		load.setOnClickListener(new OnClickListener(){
@@ -90,10 +96,11 @@ public class CoreActivity extends medi_mouse_activity {
 			}
 		
 		});
-		
+
 	}
+	
 	private void buildFacSpinners(final String path){
-		
+		Log.d("CoreActivity",":::"+path);
 		File file = new File(path);
 		facility_spinner = (Spinner) findViewById(R.id.fac_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner layout
@@ -131,67 +138,22 @@ public class CoreActivity extends medi_mouse_activity {
 		floor_spinner = (Spinner) findViewById(R.id.floor_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner layout
 		File[] files = file.listFiles(); 
-		String[] facilities = new String[files.length];
-		int x = 0;
-		for(File f : files){
-			facilities[x]=f.getName();
-			Log.d("CoreActivity",x+":"+f.getName());
-			x++;
-		}
-		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.list_item, facilities);
-		floor_spinner.setSelected(false);
-		
-		floor_spinner.setAdapter(adapter);
-		
-	}
-	private void extract(File file){
-		try {
-			
-			String destinationPath = PATH + "schematics"+
-					System.getProperty("file.separator") + 
-					file.getName().replaceFirst(".zip", "") +
-					System.getProperty("file.separator");
-			new File(destinationPath).mkdirs();
-			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
-			
-			
-			ZipEntry entry = zis.getNextEntry();
-			byte[] buf = new byte[1024];
-			
-			while(entry!=null){
-				String outFilePath = destinationPath + 
-						 entry.getName();
-				Log.d("CoreActivity","Extracting "+outFilePath);
-				File outFile = new File(outFilePath);
-				if(outFile.exists()&&outFile.length()==entry.getSize()){
-					//already extracted
-					Log.d("CoreActivity","already extracted, skipping...");
-					entry = zis.getNextEntry();
-					continue;
-				}
-				
-				FileOutputStream fileoutputstream = new FileOutputStream(outFile); 
-				
-				int n;
-				while ((n = zis.read(buf, 0, 1024)) > -1)
-	                    fileoutputstream.write(buf, 0, n);
-				
-				fileoutputstream.close();
-				Log.d("CoreActivity","Done");
-				entry = zis.getNextEntry();
-				
+		if(files != null){
+			String[] facilities = new String[files.length];
+			int x = 0;
+			for(File f : files){
+				facilities[x]=f.getName();
+				Log.d("CoreActivity",x+":"+f.getName());
+				x++;
 			}
-			zis.close();
-            
-		} catch (ZipException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+			
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.list_item, facilities);
+			floor_spinner.setSelected(false);
+			
+			floor_spinner.setAdapter(adapter);
+		}
 	}
+	
 	@Override
 	public void onPostExecute(medi_person result) {
 		

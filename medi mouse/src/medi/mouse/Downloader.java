@@ -3,12 +3,16 @@ package medi.mouse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -138,6 +142,55 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 		
 		return 0;
 	}
+	
+	private void extract(File file){
+		try {
+			
+			String destinationPath = parentActivity.PATH + "schematics"+
+					System.getProperty("file.separator") + 
+					file.getName().replaceFirst(".zip", "") +
+					System.getProperty("file.separator");
+			new File(destinationPath).mkdirs();
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+			
+			
+			ZipEntry entry = zis.getNextEntry();
+			byte[] buf = new byte[1024];
+			
+			while(entry!=null){
+				String outFilePath = destinationPath + 
+						 entry.getName();
+				Log.d("CoreActivity","Extracting "+outFilePath);
+				File outFile = new File(outFilePath);
+				if(outFile.exists()&&outFile.length()==entry.getSize()){
+					//already extracted
+					Log.d("CoreActivity","already extracted, skipping...");
+					entry = zis.getNextEntry();
+					continue;
+				}
+				
+				FileOutputStream fileoutputstream = new FileOutputStream(outFile); 
+				
+				int n;
+				while ((n = zis.read(buf, 0, 1024)) > -1)
+	                    fileoutputstream.write(buf, 0, n);
+				
+				fileoutputstream.close();
+				Log.d("CoreActivity","Done");
+				entry = zis.getNextEntry();
+				
+			}
+			zis.close();
+            
+		} catch (ZipException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
 	@Override
 	protected void onPostExecute(Integer ret){
 		Log.d("Downloader","done...");
@@ -147,11 +200,16 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 		boolean found = false;
 		if(files!=null){
 			for(File f : files){
-				Log.d("Downloader",f.toString());
-				if(f.toString()==appDir+"/Framingham.zip"){
+				Log.d("Downloader",f.toString()+":"+appDir+"/Framingham.zip"+"?"+(f.toString().compareTo(appDir+"/Framingham.zip")==0));
+				if(f.toString().compareTo(appDir+"/Framingham.zip")==0){
 					found=true;
+					extract(f);
 				}
 			}
+			parentActivity.buildUI();
 		}
+		
+		
+		
 	}
 }

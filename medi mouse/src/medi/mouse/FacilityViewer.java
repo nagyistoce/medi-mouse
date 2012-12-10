@@ -65,6 +65,10 @@ public class FacilityViewer extends View {
 	Vibrator vibrator;
 	private Rect clipBounds_canvas;
 	private Bitmap lowres_image;
+	private String filename;
+	private Bitmap highResImg;
+	private Rect highResRect;
+	private LoadImageMap loadHighresImg;
 	public FacilityViewer(Context context) {
 		this(context,null,0);
 	}
@@ -82,6 +86,7 @@ public class FacilityViewer extends View {
 	
 	public FacilityViewer(CoreActivity context,String filename) {
 		this(context);
+		this.filename=filename;
 		context.setContentView(R.layout.facility);
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
@@ -102,7 +107,7 @@ public class FacilityViewer extends View {
 	public void setBitmap(Bitmap bitmap){
 		mBitmap = bitmap;
 		
-		Log.d("FacilityViewer", "invalidate");
+		//Log.d("FacilityViewer", "invalidate");
 	}
 	
 	
@@ -133,8 +138,12 @@ public class FacilityViewer extends View {
         }
 
         case MotionEvent.ACTION_MOVE: {
-        	Log.d("FacilityView","MOVE: "+ev.getEventTime());
+        	//Log.d("FacilityView","MOVE: "+ev.getEventTime());
             final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+            if(pointerIndex==-1){
+            	break;
+            }
+            Log.d("FacilityViewer","pointerIndex: "+pointerIndex);
             final float x = ev.getX(pointerIndex);
             final float y = ev.getY(pointerIndex);
         
@@ -142,7 +151,7 @@ public class FacilityViewer extends View {
             if (!mScaleDetector.isInProgress()) {
                 final float dx = x - mLastTouchX;
                 final float dy = y - mLastTouchY;
-                Log.d("FacilityViewer","dx/dy: "+dx+"/"+dy);
+                //Log.d("FacilityViewer","dx/dy: "+dx+"/"+dy);
                 if(dx*dx+dy*dy>3){
                 	longpressTimer.cancel(true);
 	                mPosX += dx;
@@ -164,19 +173,19 @@ public class FacilityViewer extends View {
         
         case MotionEvent.ACTION_UP: {
         	longpressTimer.cancel(true);
-        	Log.d("FacilityView","UP: "+ev.getEventTime());
+        	//Log.d("FacilityView","UP: "+ev.getEventTime());
             mActivePointerId = MotionEvent.INVALID_POINTER_ID;
             break;
         }
 
         case MotionEvent.ACTION_CANCEL: {
-        	Log.d("FacilityView","CANCEL: "+ev.getEventTime());
+        	//Log.d("FacilityView","CANCEL: "+ev.getEventTime());
             mActivePointerId = MotionEvent.INVALID_POINTER_ID;
             break;
         }
         
         case MotionEvent.ACTION_POINTER_UP: {
-        	Log.d("FacilityView","POINTER_UP: "+ev.getEventTime());
+        	//Log.d("FacilityView","POINTER_UP: "+ev.getEventTime());
             final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) 
                     >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
             final int pointerId = ev.getPointerId(pointerIndex);
@@ -228,26 +237,56 @@ public class FacilityViewer extends View {
         canvas.translate(mPosX, mPosY);
         
         clipBounds_canvas = canvas.getClipBounds();
-        float centerX = clipBounds_canvas.left + (clipBounds_canvas.right-clipBounds_canvas.left)/2;
-        float centerY = clipBounds_canvas.top + (clipBounds_canvas.bottom-clipBounds_canvas.top)/2;
         
+        float centerX = clipBounds_canvas.exactCenterX();
+        float centerY = clipBounds_canvas.exactCenterY();
+
         canvas.scale(mScaleFactor, mScaleFactor,centerX,centerY);
         //canvas.translate(2*mPosX, 2*mPosY);
         
         //canvas.scale(4, 4, centerX, centerY);
         
         canvas.drawBitmap(lowres_image,0, 0, null);
+        if(highResImg!=null&&
+        		highResRect!=null){
+        	canvas.drawBitmap(highResImg, null, highResRect, null);
+        }
         
 		clipBounds_canvas = canvas.getClipBounds();
-		if(mScaleFactor>=1) {
-			//load high res image
+		if(mScaleFactor>=1.5) {
 			
+			
+			int offsetY = clipBounds_canvas.height()/2;
+			int offsetX = clipBounds_canvas.width()/2;
+			Rect source_rect = new Rect((int)((centerX-offsetX)*4),
+					(int)((centerY-offsetY)*4),
+					(int)((centerX+offsetX)*4),
+					(int)((centerY+offsetY)*4));
+			Rect dest_rect = new Rect((int)centerX-offsetX,
+					(int)centerY-offsetY,
+					(int)centerX+offsetX,
+					(int)centerY+offsetY);
+			Log.d("FacilityViewer","last: "+highResRect+"\n"+"next: "+dest_rect);
+			if(highResRect==null||!highResRect.contains(dest_rect)){
+				Log.d("FacilityViewer","load high res");
+				if(loadHighresImg!=null){
+					if(!loadHighresImg.dest.contains(dest_rect)){
+						loadHighresImg.cancel(true);
+						loadHighresImg = new LoadImageMap(this,source_rect,dest_rect,filename);
+						loadHighresImg.execute("");
+					}
+						
+				} else {
+					loadHighresImg = new LoadImageMap(this,source_rect,dest_rect,filename);
+					loadHighresImg.execute("");
+				}
+				
+			}
 			
 		}
 		
 		
-		Log.d("FacilityViewer",clipBounds_canvas.left+","+clipBounds_canvas.top+":"+
-				clipBounds_canvas.right+","+clipBounds_canvas.bottom);
+		//Log.d("FacilityViewer","bounds: "+clipBounds_canvas);
 		if(markSpot){
 			
 			int size = 15;
@@ -288,11 +327,20 @@ public class FacilityViewer extends View {
 
             // Don't let the object get too small or too large.
             mScaleFactor = Math.max(0.05f, Math.min(mScaleFactor, 10.0f));
-            Log.d("FacilityViewer","scalling... "+mScaleFactor);
+            //Log.d("FacilityViewer","scalling... "+mScaleFactor);
             invalidate();
             return true;
         }
     }
+	public void highResListener(Bitmap highResImg, Rect dest) {
+		Log.d("FacilityViewer","saving highres bitmap");
+		this.highResImg = highResImg;
+		this.highResRect = dest;
+		this.loadHighresImg = null;
+		invalidate();
+	
+		
+	}
 
 
 
