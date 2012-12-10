@@ -39,23 +39,43 @@ public abstract class medi_mouse_activity extends Activity {
         return super.onPrepareOptionsMenu(menu);
     }
 
-
+    @Override
+    public void onBackPressed(){
+    	if (this instanceof MedibugsActivity){
+    		super.onBackPressed();
+    	} else {
+			Intent intent = new Intent(this, MedibugsActivity.class);
+		    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		    
+		    startActivity(intent);
+    	}
+    }
+    
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	Log.d("ActionBar",item.getItemId()+":");
+    	Intent intent;
         switch (item.getItemId()) {
         	case android.R.id.home:
-        		Intent intent = new Intent(this, MedibugsActivity.class);
+        		intent = new Intent(this, MedibugsActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                
                 startActivity(intent);
                 return true;
         	case R.id.signinout:
-        		startActivity(new Intent(this,EditStatus.class));
+        		intent = new Intent(this,EditStatus.class);
+        		startActivity(intent);
         		return true;
         		
             case R.id.settings:
-                startActivity(new Intent(this, EditPreferences.class));
+            	intent = new Intent(this, EditPreferences.class);
+            	startActivity(intent);
+                return true;
+            case R.id.core:
+            	intent = new Intent(this, CoreActivity.class);
+            	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            	startActivity(intent);
                 return true;
             case R.id.helpabout:
                 LayoutInflater inflater = LayoutInflater.from(this);

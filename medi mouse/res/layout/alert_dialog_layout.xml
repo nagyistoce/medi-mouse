@@ -3,9 +3,13 @@ android:layout_width="fill_parent" android:layout_height="wrap_content"
 android:orientation="vertical">
 <WebView android:id="@+id/DialogWebView" android:layout_height="wrap_content"
     android:layout_width="fill_parent"/>
-
+
 <Button
     android:id="@+id/crash_report"
+<<<<<<< HEAD
     android:text="report a bug" />
+=======
+    android:text="Submit bug report" />
+>>>>>>> refs/heads/core
 
 </LinearLayout>
