@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -122,12 +124,18 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 		File file = new File(path);
 		facility_spinner = (Spinner) findViewById(R.id.fac_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner layout
-		File[] files = file.listFiles(); 
+		File[] files = file.listFiles();
+		ArrayList<String> fac = new ArrayList<String>();
+		
+		for(File f : files){
+			fac.add(f.getName());
+		}
+		Collections.sort(fac);
+		
 		String[] facilities = new String[files.length];
 		int x = 0;
-		for(File f : files){
-			facilities[x]=f.getName();
-			Log.d("CoreActivity",x+":"+f.getName());
+		for(String f : fac){
+			facilities[x]=f;
 			x++;
 		}
 		
