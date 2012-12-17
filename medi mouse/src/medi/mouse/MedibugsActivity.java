@@ -87,7 +87,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         //screen refresh
         
-        //reload();
+        reload();
         if(enable_core){
         	core_post cpost = new core_post(false);
         	cpost.execute(me);

@@ -2,7 +2,9 @@
     android:id="@+id/body"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-    
+    <ProgressBar
+    	android:id="@+id/progress"
+    	style="@android:style/Widget.ProgressBar.Horizontal"/>
     <TableLayout 
 		android:id="@+id/table_view"
    		android:layout_width="fill_parent"
@@ -13,8 +15,8 @@
  		android:layout_marginTop="15px"
  		android:background="@drawable/shape">
  		
- 		<Spinner
-    		android:id="@+id/fac_spinner"
+ 		<Spinner 
+ 			android:id="@+id/fac_spinner"
     		android:layout_width="fill_parent"
     		android:layout_height="wrap_content" />
  		

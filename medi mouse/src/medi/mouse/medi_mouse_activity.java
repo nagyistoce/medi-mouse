@@ -8,6 +8,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,7 +27,11 @@ public abstract class medi_mouse_activity extends Activity {
 	protected medi_person me;
 	
 	public abstract void onPostExecute(medi_person result);
-	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	}
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
     	
@@ -72,15 +79,14 @@ public abstract class medi_mouse_activity extends Activity {
             	intent = new Intent(this, EditPreferences.class);
             	startActivity(intent);
                 return true;
-            case R.id.core:
-            	intent = new Intent(this, CoreActivity.class);
+            case R.id.maps:
+            	intent = new Intent(this, FacilityViewerActivity.class);
             	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             	startActivity(intent);
                 return true;
             case R.id.helpabout:
                 LayoutInflater inflater = LayoutInflater.from(this);
 
-                // error here
                 View alertDialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
 
                 WebView myWebView = (WebView) alertDialogView.findViewById(R.id.DialogWebView);
@@ -107,7 +113,11 @@ public abstract class medi_mouse_activity extends Activity {
         }
         return false;
     }
-
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        //super.onConfigurationChanged(newConfig);
+        //here you can handle orientation change
+    }
     
 	public void onSharedPreferenceChanged(SharedPreferences spref, String arg1) {  
 		

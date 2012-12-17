@@ -23,10 +23,10 @@ import android.util.Log;
 public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 	// constants
     private static final int DOWNLOAD_BUFFER_SIZE = 2097152;
-    
+    public static final String TAG = "Downloader";
     private String downloadUrl;
-    private CoreActivity parentActivity;
-
+    private FacilityViewerActivity parentActivity;
+    private int size;
 	private File target;
     /**
      * Instantiates a new Downloader object.
@@ -34,7 +34,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
      * @param inUrl String representing the URL of the file to be downloaded.
      * @param target location to save file too.
      */
-    public Downloader(CoreActivity parentActivity, String inUrl, File target) {
+    public Downloader(FacilityViewerActivity parentActivity, String inUrl, File target) {
     	downloadUrl = inUrl != null?inUrl:"";
         this.parentActivity = parentActivity;
         this.target = target;
@@ -54,7 +54,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
             
             // we're going to connect now
             msg = Message.obtain(parentActivity.activityHandler,
-                            CoreActivity.MESSAGE_CONNECTING_STARTED,
+                            FacilityViewerActivity.MESSAGE_CONNECTING_STARTED,
                             0, 0, downloadUrl);
             parentActivity.activityHandler.sendMessage(msg);
             
@@ -63,15 +63,17 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
                     url = new URL(downloadUrl);
                     conn = url.openConnection();
                     conn.setUseCaches(false);
-                    fileSize = conn.getContentLength();
-                    
+                    size = fileSize = conn.getContentLength();
+                    if(target.exists()){
+                    	return;
+                    }
                     // get the filename
                     lastSlash = url.toString().lastIndexOf('/');
                     
                     // notify download start
                     int fileSizeInKB = fileSize / 1024;
                     msg = Message.obtain(parentActivity.activityHandler,
-                    				CoreActivity.MESSAGE_DOWNLOAD_STARTED,
+                    				FacilityViewerActivity.MESSAGE_DOWNLOAD_STARTED,
                                     fileSizeInKB, 0, target.toString());
                     parentActivity.activityHandler.sendMessage(msg);
                     
@@ -82,6 +84,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
                     outStream = new BufferedOutputStream(fileStream, DOWNLOAD_BUFFER_SIZE);
                     byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
                     int bytesRead = 0, totalRead = 0;
+                    
                     while(!isCancelled() && (bytesRead = inStream.read(data, 0, data.length)) >= 0)
                     {
                             outStream.write(data, 0, bytesRead);
@@ -91,12 +94,12 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
                             int totalReadInKB = totalRead / 1024;
                             
                             //Log.d("Downloader",totalRead+", "+bytesRead);
-                            /*
+                            
                             msg = Message.obtain(parentActivity.activityHandler,
-                                            CoreActivity.MESSAGE_UPDATE_PROGRESS_BAR,
-                                            totalReadInKB, 0);
+                                            FacilityViewerActivity.MESSAGE_UPDATE_PROGRESS_BAR,
+                                            (int)(((float)totalReadInKB/fileSizeInKB)*100), 0);
                             parentActivity.activityHandler.sendMessage(msg);
-                            */
+                            
                     }
                     outStream.flush();
                     
@@ -113,19 +116,19 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
                     {
                             // notify completion
                             msg = Message.obtain(parentActivity.activityHandler,
-                            		CoreActivity.MESSAGE_DOWNLOAD_COMPLETE);
+                            		FacilityViewerActivity.MESSAGE_DOWNLOAD_COMPLETE);
                             parentActivity.activityHandler.sendMessage(msg);
                     }
             } catch(MalformedURLException e) {
                     String errMsg = parentActivity.getString(R.string.error_message_bad_url);
                     msg = Message.obtain(parentActivity.activityHandler,
-                    				CoreActivity.MESSAGE_ENCOUNTERED_ERROR,
+                    				FacilityViewerActivity.MESSAGE_ENCOUNTERED_ERROR,
                                     0, 0, errMsg);
                     parentActivity.activityHandler.sendMessage(msg);
             } catch(FileNotFoundException e) {
                     String errMsg = parentActivity.getString(R.string.error_message_file_not_found);
                     msg = Message.obtain(parentActivity.activityHandler,
-                                    CoreActivity.MESSAGE_ENCOUNTERED_ERROR,
+                                    FacilityViewerActivity.MESSAGE_ENCOUNTERED_ERROR,
                                     0, 0, errMsg);
                     parentActivity.activityHandler.sendMessage(msg); 
             } catch (IOException e) {
@@ -139,33 +142,63 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 	@Override
 	protected Integer doInBackground(Integer... params) {
 		run();
-		
+		Log.d("Downloader","done...");
+		File appDir = new File(Environment.getExternalStorageDirectory()+"/mm/");
+		Log.d("Downloader",appDir.toString());
+		File[] files = appDir.listFiles();
+		boolean found = false;
+		if(files!=null){
+			for(File f : files){
+				if(f.toString().compareTo(target.toString())==0){
+					found=true;
+					extract(target);
+				}
+			}
+		}
 		return 0;
 	}
 	
 	private void extract(File file){
 		try {
-			
-			String destinationPath = parentActivity.PATH + "schematics"+
+			Message msg;
+			msg = Message.obtain(parentActivity.activityHandler,
+                    FacilityViewerActivity.MESSAGE_EXTRACTION_STARTED,
+                    0, 0);
+			Log.d(TAG,"start extract");
+			parentActivity.activityHandler.sendMessage(msg); 
+			String destinationPath = parentActivity.PATH +
 					System.getProperty("file.separator") + 
 					file.getName().replaceFirst(".zip", "") +
 					System.getProperty("file.separator");
 			new File(destinationPath).mkdirs();
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
 			
-			
+			size *= 1.25;
 			ZipEntry entry = zis.getNextEntry();
 			byte[] buf = new byte[1024];
-			
+			int totalReadIn=0;
 			while(entry!=null){
 				String outFilePath = destinationPath + 
 						 entry.getName();
-				Log.d("CoreActivity","Extracting "+outFilePath);
+				if(entry.isDirectory()){
+					new File(destinationPath+entry.getName()).mkdirs();
+					//Log.d("Downloader","Create dir: "+entry.getName());
+					entry = zis.getNextEntry();
+					continue;
+				}
+				Log.d(TAG,"Extracting "+outFilePath);
 				File outFile = new File(outFilePath);
 				if(outFile.exists()&&outFile.length()==entry.getSize()){
 					//already extracted
-					Log.d("CoreActivity","already extracted, skipping...");
+					
 					entry = zis.getNextEntry();
+					totalReadIn+=outFile.length();
+					Log.d(TAG,"already extracted, skipping..."+(int)(((float)totalReadIn/size)*100));
+
+					msg = Message.obtain(parentActivity.activityHandler,
+                            FacilityViewerActivity.MESSAGE_UPDATE_PROGRESS_BAR,
+                            (int)(((float)totalReadIn/size)*100), 0);
+					parentActivity.activityHandler.sendMessage(msg);
 					continue;
 				}
 				
@@ -176,40 +209,35 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 	                    fileoutputstream.write(buf, 0, n);
 				
 				fileoutputstream.close();
+				
+				totalReadIn+=outFile.length();
+				Log.d(TAG,"update progress: "+(int)(((float)totalReadIn/size)*100));
+				msg = Message.obtain(parentActivity.activityHandler,
+                        FacilityViewerActivity.MESSAGE_UPDATE_PROGRESS_BAR,
+                        (int)(((float)totalReadIn/size)*100), 0);
+				parentActivity.activityHandler.sendMessage(msg);
 				Log.d("CoreActivity","Done");
 				entry = zis.getNextEntry();
 				
 			}
 			zis.close();
+			Log.d(TAG,"Extraction complete");
+			msg = Message.obtain(parentActivity.activityHandler,
+                    FacilityViewerActivity.MESSAGE_EXTRACTION_COMPLETED,
+                    0, 0);
+			parentActivity.activityHandler.sendMessage(msg);
             
 		} catch (ZipException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 	}
 	
 	@Override
 	protected void onPostExecute(Integer ret){
-		Log.d("Downloader","done...");
-		File appDir = new File(Environment.getExternalStorageDirectory()+"/mm/");
-		Log.d("Downloader",appDir.toString());
-		File[] files = appDir.listFiles();
-		boolean found = false;
-		if(files!=null){
-			for(File f : files){
-				Log.d("Downloader",f.toString()+":"+appDir+"/Framingham.zip"+"?"+(f.toString().compareTo(appDir+"/Framingham.zip")==0));
-				if(f.toString().compareTo(appDir+"/Framingham.zip")==0){
-					found=true;
-					extract(f);
-				}
-			}
-			parentActivity.buildUI();
-		}
 		
-		
+		parentActivity.buildUI();
 		
 	}
 }

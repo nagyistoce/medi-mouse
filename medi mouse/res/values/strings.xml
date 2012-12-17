@@ -3,16 +3,18 @@
 
     <string name="app_name">Medi Mouse</string>
     <string name="submit">Submit</string>
-<<<<<<< HEAD
     <string name="crashing">Getting device info</string>
-=======
-    <string name="crashing">building stack trace</string>
+	<string name="large_download_confirm_message">
+	I\'m about to download a huge file (>50MB), you might want to be on wifi.
+	Press OK when you\'re ready.
+	</string>
+	
     <string name="help_about_message">\n
     created by Will Cohen \n
     source code: https://code.google.com/p/medi-mouse/ \n
-    version 1.141 \n
+    version 2.05 \n
     </string>
->>>>>>> refs/heads/core
+
     <string name="help_about">About</string>
     <string name="OK">OK</string>
     

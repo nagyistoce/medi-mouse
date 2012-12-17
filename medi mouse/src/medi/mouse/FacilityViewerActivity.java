@@ -10,6 +10,10 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import org.acra.ErrorReporter;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,40 +21,49 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class CoreActivity extends medi_mouse_activity {
+public class FacilityViewerActivity extends medi_mouse_activity {
 	public static final int MESSAGE_DOWNLOAD_STARTED = 1000;
     public static final int MESSAGE_DOWNLOAD_COMPLETE = 1001;
     public static final int MESSAGE_UPDATE_PROGRESS_BAR = 1002;
     public static final int MESSAGE_DOWNLOAD_CANCELED = 1003;
     public static final int MESSAGE_CONNECTING_STARTED = 1004;
     public static final int MESSAGE_ENCOUNTERED_ERROR = 1005;
+    public static final int MESSAGE_EXTRACTION_STARTED = 1006;
+    public static final int MESSAGE_EXTRACTION_COMPLETED = 1007;
     
     public static final String PATH = Environment.getExternalStorageDirectory()+"/mm/";
+    public static final String TAG = "FacilityViewerActivity";
 	private Spinner facility_spinner;
 	private Spinner floor_spinner;
+	private ProgressBar progressBar;
     
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.building_select);
-		
+		progressBar = (ProgressBar) findViewById(R.id.progress);
+		progressBar.setMax(100);
+		progressBar.setVisibility(View.GONE);
 		/*
 		 * download schematics
 		 * extract zips
 		 */
-		File appDir = new File(PATH+"schematics");
+		File appDir = new File(PATH);
 		
 		appDir.mkdirs();
 		File[] files = appDir.listFiles();
@@ -61,24 +74,39 @@ public class CoreActivity extends medi_mouse_activity {
 			for(File f : files){
 				
 				Log.d("CoreActivity",f.getName());
-				if(f.getName().compareTo("Framingham")==0){
+				if(f.getName().compareTo("schematics")==0){
 					found=true;
 				}
 				
 			}
 		}
 		if(!found){
-			Log.d("CoreActivity","downloading...");
-			Downloader dl = new Downloader(this, 
-					"https://medi-mouse.googlecode.com/files/Framingham.zip", 
-					new File(PATH+"/Framingham.zip"));
-			dl.execute(0);
+			
+			LargeFilerAlertAndDownload();
 		} else {
 			buildUI();
 		}
 				
 	}
+	private void LargeFilerAlertAndDownload(){
+		LayoutInflater inflater = LayoutInflater.from(this);
 	
+	   View alertDialogView = inflater.inflate(R.layout.large_file_alert, null);
+	   AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	   builder.setView(alertDialogView); 
+	    
+	   builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) {
+	        	progressBar.setVisibility(View.VISIBLE);
+	        	Downloader dl = new Downloader(FacilityViewerActivity.this, 
+						"http://medi-mouse.googlecode.com/files/schematics.zip", 
+						new File(PATH+"/schematics.zip"));
+				dl.execute(0);
+	            dialog.cancel();
+	        }
+	    }).show();
+	   
+	}
 	public void buildUI(){
 		buildFacSpinners(PATH + "schematics");
 		Button load = (Button) findViewById(R.id.load);
@@ -88,10 +116,10 @@ public class CoreActivity extends medi_mouse_activity {
 				String image = PATH + "schematics/"+
 						facility_spinner.getSelectedItem()+"/"+ 
 						floor_spinner.getSelectedItem();
-				FacilityViewer fv = new FacilityViewer(CoreActivity.this,image);
+				FacilityViewer fv = new FacilityViewer(FacilityViewerActivity.this,image);
 				LinearLayout ll = (LinearLayout) findViewById(R.id.main);
+				ll.removeAllViews();
 				ll.addView(fv);
-				Log.d("CoreActivity","blam");
 				
 			}
 		
@@ -115,14 +143,13 @@ public class CoreActivity extends medi_mouse_activity {
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.list_item, facilities);
 		facility_spinner.setSelected(false);
-		
 		facility_spinner.setOnItemSelectedListener(new OnItemSelectedListener(){
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
 				TextView tv = (TextView) arg0.findViewById(R.id.primary_text_item);
 				
 				Log.d("CoreActivity","text "+tv.getText());
-				CoreActivity.this.buildFloorSpinners(path+"/"+tv.getText());
+				FacilityViewerActivity.this.buildFloorSpinners(path+"/"+tv.getText());
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
@@ -167,7 +194,26 @@ public class CoreActivity extends medi_mouse_activity {
     	public void handleMessage(Message msg)
         {
     			Log.d("CoreActivity","handled message: "+msg.what+", "+msg.arg1+", "+msg.arg2+", "+msg.obj);
-    			
+    			switch(msg.what){
+    			case MESSAGE_UPDATE_PROGRESS_BAR:
+    				Log.d(TAG,"update progress: "+msg.arg1);
+    				progressBar.setProgress(msg.arg1);
+    				break;
+    			case MESSAGE_DOWNLOAD_STARTED:
+    				Toast.makeText(FacilityViewerActivity.this, 
+    						"dowload started", Toast.LENGTH_SHORT).show();
+    				progressBar.setVisibility(View.VISIBLE);
+    				break;
+    			case MESSAGE_EXTRACTION_STARTED:
+    				Toast.makeText(FacilityViewerActivity.this, 
+    						"extracting files...", Toast.LENGTH_SHORT).show();
+    				progressBar.setVisibility(View.VISIBLE);
+    				progressBar.setProgress(0);
+    				break;
+    			case MESSAGE_EXTRACTION_COMPLETED:	
+    				progressBar.setVisibility(View.GONE);
+    				break;
+    			}
                 //Toast.makeText(CoreActivity.this, "message: "+msg.what, Toast.LENGTH_LONG).show();
         }
     };

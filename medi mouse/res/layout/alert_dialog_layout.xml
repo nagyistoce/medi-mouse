@@ -6,10 +6,5 @@ android:orientation="vertical">
 
 <Button
     android:id="@+id/crash_report"
-<<<<<<< HEAD
-    android:text="report a bug" />
-=======
     android:text="Submit bug report" />
->>>>>>> refs/heads/core
-
 </LinearLayout>

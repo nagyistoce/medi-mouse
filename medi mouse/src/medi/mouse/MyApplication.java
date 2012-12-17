@@ -15,8 +15,11 @@ import android.app.Application;
 @SuppressLint("ParserError")
 @ReportsCrashes(formKey = "", 
 	mode = ReportingInteractionMode.TOAST,
-	customReportContent = {ReportField.APP_VERSION_NAME, ReportField.PACKAGE_NAME,
-		ReportField.ANDROID_VERSION, ReportField.PHONE_MODEL,  ReportField.LOGCAT, 
+	customReportContent = {ReportField.APP_VERSION_NAME, 
+		ReportField.PACKAGE_NAME,
+		ReportField.ANDROID_VERSION, 
+		ReportField.PHONE_MODEL,  
+		ReportField.LOGCAT, 
 		ReportField.STACK_TRACE }, 
 	resToastText = R.string.crashing,
 	mailTo = "chewnoill@gmail.com") 

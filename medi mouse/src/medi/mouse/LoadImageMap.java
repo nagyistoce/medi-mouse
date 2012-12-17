@@ -42,14 +42,13 @@ public class LoadImageMap extends AsyncTask<String, Float, Bitmap> {
 		
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inJustDecodeBounds=false;
-		opts.inSampleSize=2;
+		opts.inSampleSize=1;
 		
 		BitmapRegionDecoder decoder;
 		try {
 			decoder = BitmapRegionDecoder.newInstance(filename, false);
 			//return highres slice of image
-			Log.d("LoadImageMap","getting bitmap: "+dest);
-			
+			Log.d("LoadImageMap","getting bitmap: "+source);
 			Bitmap ret = decoder.decodeRegion(source, opts);
 			if(this.isCancelled()){
 				return null;

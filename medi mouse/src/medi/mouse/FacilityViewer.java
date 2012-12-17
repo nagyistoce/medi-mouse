@@ -41,8 +41,8 @@ import android.widget.Toast;
 public class FacilityViewer extends View {
 
 	private static final long LONGPRESS_THRESHOLD = 500;
-	private int mImage;
-    private Bitmap mBitmap;
+	private static final String TAG = "FacilityViewer";
+	
 	private float mPosX=0;
     private float mPosY=0;
 
@@ -52,14 +52,9 @@ public class FacilityViewer extends View {
 
     private int screenWidth;
     private int screenHeight;
-    private int curX=0;
-    private int curY=0;
     private ScaleGestureDetector mScaleDetector;
-    private OnLongClickListener mLongTouchDetector;
     LongPressTimer longpressTimer = new LongPressTimer();
-    private float mScaleFactor = 1/4.f;
-	private int picture_width;
-	private int picture_height;
+    private float mScaleFactor = 1.f;
 	private Point spot;
 	private boolean markSpot = false;
 	Vibrator vibrator;
@@ -69,6 +64,11 @@ public class FacilityViewer extends View {
 	private Bitmap highResImg;
 	private Rect highResRect;
 	private LoadImageMap loadHighresImg;
+	private int LowresSampleSize;
+	private int high_width;
+	private int high_height;
+	private int low_width;
+	private int low_height;
 	public FacilityViewer(Context context) {
 		this(context,null,0);
 	}
@@ -84,7 +84,7 @@ public class FacilityViewer extends View {
 	
     }
 	
-	public FacilityViewer(CoreActivity context,String filename) {
+	public FacilityViewer(FacilityViewerActivity context,String filename) {
 		this(context);
 		this.filename=filename;
 		context.setContentView(R.layout.facility);
@@ -97,19 +97,19 @@ public class FacilityViewer extends View {
 		
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inJustDecodeBounds=true;
+		opts.inSampleSize=1;
 		BitmapFactory.decodeFile(filename, opts);
-		
+		high_width = opts.outWidth;
+		high_height = opts.outHeight;
+		LowresSampleSize = Math.round(Math.max(opts.outWidth, opts.outHeight)/(float)screenWidth);
 		opts.inJustDecodeBounds=false;
-		opts.inSampleSize=4;
+		opts.inSampleSize=LowresSampleSize;
+		Log.d(TAG,"Sample size: "+LowresSampleSize);
 		lowres_image = BitmapFactory.decodeFile(filename, opts);
+		low_width = opts.outWidth;
+		low_height = opts.outHeight;
 		invalidate();
 	}
-	public void setBitmap(Bitmap bitmap){
-		mBitmap = bitmap;
-		
-		//Log.d("FacilityViewer", "invalidate");
-	}
-	
 	
 	@Override
     public boolean onTouchEvent(final MotionEvent ev) {
@@ -120,7 +120,7 @@ public class FacilityViewer extends View {
         switch (action) {
         
         case MotionEvent.ACTION_DOWN: {
-        	Log.d("FacilityView","DOWN: "+ev.getEventTime());
+        	//Log.d(TAG,"DOWN: "+ev.getEventTime());
             final float x = ev.getX();
             final float y = ev.getY();
             
@@ -143,7 +143,7 @@ public class FacilityViewer extends View {
             if(pointerIndex==-1){
             	break;
             }
-            Log.d("FacilityViewer","pointerIndex: "+pointerIndex);
+            //Log.d(TAG,"pointerIndex: "+pointerIndex);
             final float x = ev.getX(pointerIndex);
             final float y = ev.getY(pointerIndex);
         
@@ -154,8 +154,8 @@ public class FacilityViewer extends View {
                 //Log.d("FacilityViewer","dx/dy: "+dx+"/"+dy);
                 if(dx*dx+dy*dy>3){
                 	longpressTimer.cancel(true);
-	                mPosX += dx;
-	                mPosY += dy;
+	                mPosX += dx/mScaleFactor;
+	                mPosY += dy/mScaleFactor;
                 
 	                invalidate();
                 }else{
@@ -201,7 +201,7 @@ public class FacilityViewer extends View {
          
         }
         default:
-        	Log.d("FacilityView","NOTHING: "+ev.getEventTime());
+        	Log.d(TAG,"NOTHING: "+ev.getEventTime());
         }
 
         return true;
@@ -235,6 +235,7 @@ public class FacilityViewer extends View {
         
         //canvas.translate(-mPosX * mScaleFactor , -mPosY * mScaleFactor);
         canvas.translate(mPosX, mPosY);
+        //canvas.translate(mPosX/mScaleFactor, mPosY/mScaleFactor);
         
         clipBounds_canvas = canvas.getClipBounds();
         
@@ -242,33 +243,36 @@ public class FacilityViewer extends View {
         float centerY = clipBounds_canvas.exactCenterY();
 
         canvas.scale(mScaleFactor, mScaleFactor,centerX,centerY);
-        //canvas.translate(2*mPosX, 2*mPosY);
-        
-        //canvas.scale(4, 4, centerX, centerY);
-        
+       
         canvas.drawBitmap(lowres_image,0, 0, null);
-        if(highResImg!=null&&
-        		highResRect!=null){
-        	canvas.drawBitmap(highResImg, null, highResRect, null);
-        }
+        
         
 		clipBounds_canvas = canvas.getClipBounds();
-		if(mScaleFactor>=1.5) {
+		if(mScaleFactor/LowresSampleSize>=.8) {
+			if(highResImg!=null&&
+	        		highResRect!=null){
+	        	canvas.drawBitmap(highResImg, null, highResRect, null);
+	        }
 			
 			
-			int offsetY = clipBounds_canvas.height()/2;
-			int offsetX = clipBounds_canvas.width()/2;
-			Rect source_rect = new Rect((int)((centerX-offsetX)*4),
-					(int)((centerY-offsetY)*4),
-					(int)((centerX+offsetX)*4),
-					(int)((centerY+offsetY)*4));
-			Rect dest_rect = new Rect((int)centerX-offsetX,
-					(int)centerY-offsetY,
-					(int)centerX+offsetX,
-					(int)centerY+offsetY);
-			Log.d("FacilityViewer","last: "+highResRect+"\n"+"next: "+dest_rect);
+			
+			Rect dest_rect = clipBounds_canvas;
+			Rect source_rect = new Rect(Math.round(((float)dest_rect.left)/low_width*high_width),
+					Math.round(((float)dest_rect.top)/low_height*high_height),
+					Math.round(((float)dest_rect.right)/low_width*high_width),
+					Math.round(((float)dest_rect.bottom)/low_height*high_height));
+			Log.d(TAG,"last: "+highResRect+"\n"+"next: "+dest_rect+":::"+LowresSampleSize);
 			if(highResRect==null||!highResRect.contains(dest_rect)){
-				Log.d("FacilityViewer","load high res");
+				Log.d(TAG,"load high res");
+				Log.d(TAG,"source: ("+((float)source_rect.left)/high_width+", "+
+						((float)source_rect.top)/high_height+"),("+
+						((float)source_rect.right)/high_width+", "+
+						((float)source_rect.bottom)/high_height+")");
+				Log.d(TAG,"dest: ("+
+						((float)dest_rect.left)/low_width+", "+
+						((float)dest_rect.top)/low_height+"),("+
+						((float)dest_rect.right)/low_width+", "+
+						((float)dest_rect.bottom)/low_height+")");
 				if(loadHighresImg!=null){
 					if(!loadHighresImg.dest.contains(dest_rect)){
 						loadHighresImg.cancel(true);
