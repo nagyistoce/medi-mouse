@@ -20,7 +20,7 @@ import android.os.Environment;
 import android.os.Message;
 import android.util.Log;
 
-public class Downloader extends AsyncTask<Integer,Integer,Integer> {
+public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 	// constants
     private static final int DOWNLOAD_BUFFER_SIZE = 2097152;
     public static final String TAG = "Downloader";
@@ -28,6 +28,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
     private FacilityViewerActivity parentActivity;
     private int size;
 	private File target;
+	private boolean chk_file;
     /**
      * Instantiates a new Downloader object.
      * @param parentActivity Reference to AndroidFileDownloader activity.
@@ -38,8 +39,45 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
     	downloadUrl = inUrl != null?inUrl:"";
         this.parentActivity = parentActivity;
         this.target = target;
+        chk_file=false;
     }
-    
+    public Downloader(FacilityViewerActivity parentActivity, String inUrl, File target,
+    		boolean chk_file){
+    	this(parentActivity,inUrl,target);
+    	this.chk_file= chk_file;
+    }
+    public Downloader(Downloader that){
+    	this(that.parentActivity,that.downloadUrl,that.target);
+    	
+    }
+    private boolean chk_file(){
+    	URL url;
+        URLConnection conn;
+        int fileSize, lastSlash;
+        String fileName;
+        try {
+			url = new URL(downloadUrl);
+		
+	        conn = url.openConnection();
+	        conn.setUseCaches(false);
+	        fileSize = conn.getContentLength();
+	        
+	        if(target.exists()&&target.length()==fileSize){
+	        	return true;
+	        }else{
+	        	return false;
+	        }
+	        	
+        } catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return false;
+        
+    }
     public void run()
     {
             URL url;
@@ -65,7 +103,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
                     conn.setUseCaches(false);
                     size = fileSize = conn.getContentLength();
                     if(target.exists()){
-                    	return;
+                    	target.delete();
                     }
                     // get the filename
                     lastSlash = url.toString().lastIndexOf('/');
@@ -140,22 +178,28 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 
     
 	@Override
-	protected Integer doInBackground(Integer... params) {
-		run();
-		Log.d("Downloader","done...");
-		File appDir = new File(Environment.getExternalStorageDirectory()+"/mm/");
-		Log.d("Downloader",appDir.toString());
-		File[] files = appDir.listFiles();
-		boolean found = false;
-		if(files!=null){
-			for(File f : files){
-				if(f.toString().compareTo(target.toString())==0){
-					found=true;
-					extract(target);
+	protected Boolean doInBackground(Integer... params) {
+		if(chk_file){
+			return chk_file();
+		}else{
+			run();
+			Log.d("Downloader","done...");
+			File appDir = new File(Environment.getExternalStorageDirectory()+"/mm/");
+			Log.d("Downloader",appDir.toString());
+			File[] files = appDir.listFiles();
+			boolean found = false;
+			if(files!=null){
+				for(File f : files){
+					if(f.toString().compareTo(target.toString())==0){
+						found=true;
+						extract(target);
+					}
 				}
+				
 			}
+			return true;
 		}
-		return 0;
+		
 	}
 	
 	private void extract(File file){
@@ -235,9 +279,19 @@ public class Downloader extends AsyncTask<Integer,Integer,Integer> {
 	}
 	
 	@Override
-	protected void onPostExecute(Integer ret){
-		
-		parentActivity.buildUI();
+	protected void onPostExecute(Boolean ret){
+		if(chk_file){
+			if(ret){
+				parentActivity.buildUI();
+			} else {
+				parentActivity.LargeFilerAlertAndDownload();
+			}
+		} else {
+			parentActivity.buildUI();
+		}
 		
 	}
+	
+	
+
 }

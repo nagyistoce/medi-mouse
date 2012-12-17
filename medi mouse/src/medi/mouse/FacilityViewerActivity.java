@@ -69,26 +69,16 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 		File[] files = appDir.listFiles();
 		boolean found = false;
 		
-		if(files!=null&&files.length>0){
-			Log.d("CoreActivity","files "+files[0]);
-			for(File f : files){
-				
-				Log.d("CoreActivity",f.getName());
-				if(f.getName().compareTo("schematics")==0){
-					found=true;
-				}
-				
-			}
-		}
-		if(!found){
-			
-			LargeFilerAlertAndDownload();
-		} else {
-			buildUI();
-		}
+		
+		Downloader dl = new Downloader(FacilityViewerActivity.this, 
+				"http://medi-mouse.googlecode.com/files/schematics.zip", 
+				new File(PATH+"/schematics.zip"),
+				true);
+		dl.execute(0);
+	
 				
 	}
-	private void LargeFilerAlertAndDownload(){
+	public void LargeFilerAlertAndDownload(){
 		LayoutInflater inflater = LayoutInflater.from(this);
 	
 	   View alertDialogView = inflater.inflate(R.layout.large_file_alert, null);
