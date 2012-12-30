@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<string name="version_name">2.15</string>
+	<string name="version_number">27</string>
+	
     <string name="app_name">Medi Mouse</string>
     <string name="submit">Submit</string>
     <string name="crashing">Getting device info</string>
 	<string name="large_download_confirm_message">
 	I\'m about to download a huge file (>50MB), you might want to be on wifi.
 	Press OK when you\'re ready.
+	</string>
+	
+	<string name="no_locations_found_alert">
+	I don\'t know where this location is.  Would you like to find it for me?\n
+	Thanks
+	</string>
+	
+	<string name="location_confirmation">
+	Are you sure this is the correct location?
 	</string>
 	
     <string name="help_about_message">\n

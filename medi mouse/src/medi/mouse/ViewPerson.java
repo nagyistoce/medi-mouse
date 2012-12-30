@@ -53,7 +53,7 @@ public class ViewPerson extends medi_mouse_activity {
 		
 	}
 	@Override
-	public void onPostExecute(medi_person result) {
+	public void onPostExecute(Object result) {
 		// TODO Auto-generated method stub
 		TextView name_view = (TextView) findViewById(R.id.name_view);
         TextView status_view = (TextView) findViewById(R.id.status_view);

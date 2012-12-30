@@ -140,9 +140,9 @@ public class FindPerson extends medi_mouse_activity {
 		postme.execute(me);
 	}
 	@Override
-	public void onPostExecute(medi_person result) {
+	public void onPostExecute(Object result) {
 		// TODO Auto-generated method stub
-		me = result;
+		me = (medi_person)result;
 		
 		tv = (TextView) findViewById(R.id.entry);
 		tv.setText("");

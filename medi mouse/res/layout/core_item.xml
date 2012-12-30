@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_centerInParent="true"
+android:layout_height="wrap_content"
+android:padding="10dp"
+    android:orientation="vertical">
+		<TextView
+			android:id="@+id/name"/>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_centerInParent="true"
+android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/time_wrapper">
+
+		<TextView
+		    android:id="@+id/start_time"
+		    android:layout_width="0dp"
+		    android:layout_weight=".50" />
+
+		<TextView
+		    android:id="@+id/end_time"
+		    android:layout_width="0dp"
+		    android:layout_weight=".50"/>
+
+		</LinearLayout>
+		
+<LinearLayout
+	android:layout_centerInParent="true"
+	android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/location_wrapper">
+		<TextView 
+    		android:layout_width="0dp"
+		    android:layout_weight=".90"
+			android:id="@+id/location"/>
+		<ImageView
+    		android:layout_width="0dp"
+		    android:layout_weight=".10"
+			android:id="@+id/map_icon"
+			android:src="@drawable/map_icon"/>
+</LinearLayout>		
+<View   android:id="@+id/firstDivider"
+        android:layout_height="2dp"
+        android:layout_width="fill_parent"
+        android:background="#000000" />
+</LinearLayout>

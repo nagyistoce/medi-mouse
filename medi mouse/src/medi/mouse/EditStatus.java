@@ -286,9 +286,10 @@ public class EditStatus extends medi_mouse_activity {
 	}
 
 	@Override
-	public void onPostExecute(medi_person result) {
+	public void onPostExecute(Object result) {
+		medi_person me = (medi_person)result;
 		if(!menu_built){
-			if(result.webview.contains("Network Error")){
+			if(me.webview.contains("Network Error")){
 				finish();
 				return;
 			} 

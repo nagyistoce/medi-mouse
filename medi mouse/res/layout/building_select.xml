@@ -9,10 +9,10 @@
 		android:id="@+id/table_view"
    		android:layout_width="fill_parent"
  		android:layout_height="wrap_content"
- 		android:layout_marginLeft="15px"
- 		android:layout_marginBottom="15px"
- 		android:layout_marginRight="15px"
- 		android:layout_marginTop="15px"
+ 		android:layout_marginLeft="15dp"
+ 		android:layout_marginBottom="15dp"
+ 		android:layout_marginRight="15dp"
+ 		android:layout_marginTop="15dp"
  		android:background="@drawable/shape">
  		
  		<Spinner 
@@ -20,16 +20,6 @@
     		android:layout_width="fill_parent"
     		android:layout_height="wrap_content" />
  		
- 	</TableLayout>
-    <TableLayout 
-		android:id="@+id/table_view"
-   		android:layout_width="fill_parent"
- 		android:layout_height="wrap_content"
- 		android:layout_marginLeft="15px"
- 		android:layout_marginBottom="15px"
- 		android:layout_marginRight="15px"
- 		android:layout_marginTop="15px"
- 		android:background="@drawable/shape">
  		
  		<Spinner
     		android:id="@+id/floor_spinner"
@@ -42,10 +32,10 @@
 		android:id="@+id/table_view"
    		android:layout_width="fill_parent"
  		android:layout_height="wrap_content"
- 		android:layout_marginLeft="15px"
- 		android:layout_marginBottom="15px"
- 		android:layout_marginRight="15px"
- 		android:layout_marginTop="15px"
+ 		android:layout_marginLeft="15dp"
+ 		android:layout_marginBottom="15dp"
+ 		android:layout_marginRight="15dp"
+ 		android:layout_marginTop="15dp"
  		android:background="@drawable/shape">
  		
  		<Button

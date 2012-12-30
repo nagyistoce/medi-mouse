@@ -4,10 +4,10 @@
      android:layout_width="fill_parent"
 	  
 	android:layout_height="wrap_content"
-	android:layout_marginLeft="15px"
-	android:layout_marginBottom="15px"
-	android:layout_marginRight="15px"
-	android:layout_marginTop="15px"> 
+	android:layout_marginLeft="15dp"
+	android:layout_marginBottom="15dp"
+	android:layout_marginRight="15dp"
+	android:layout_marginTop="15dp"> 
      <gradient android:startColor="#d2c133" android:endColor="#e3d241" 
             android:angle="270"/> 
 

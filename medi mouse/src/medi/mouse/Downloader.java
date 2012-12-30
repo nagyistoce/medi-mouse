@@ -29,6 +29,8 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
     private int size;
 	private File target;
 	private boolean chk_file;
+	private boolean is_checked=false;
+	private boolean is_good;
     /**
      * Instantiates a new Downloader object.
      * @param parentActivity Reference to AndroidFileDownloader activity.
@@ -40,6 +42,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
         this.parentActivity = parentActivity;
         this.target = target;
         chk_file=false;
+        parentActivity.downloadIncomplete = true;
     }
     public Downloader(FacilityViewerActivity parentActivity, String inUrl, File target,
     		boolean chk_file){
@@ -55,17 +58,18 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
         URLConnection conn;
         int fileSize, lastSlash;
         String fileName;
+        boolean ret = false;
         try {
 			url = new URL(downloadUrl);
 		
 	        conn = url.openConnection();
 	        conn.setUseCaches(false);
-	        fileSize = conn.getContentLength();
+	        long lastmod = conn.getLastModified();
 	        
-	        if(target.exists()&&target.length()==fileSize){
-	        	return true;
-	        }else{
-	        	return false;
+	        Log.d(TAG,"this: "+target.lastModified());
+	        Log.d(TAG,"that: "+lastmod);
+	        if(target.exists()&&target.lastModified()>=lastmod){
+	        	ret = true;
 	        }
 	        	
         } catch (MalformedURLException e) {
@@ -75,8 +79,17 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return false;
+        this.is_checked=true;
+        this.is_good = ret;
+        Log.d(TAG,"is_good: "+ret);
+        return ret;
         
+    }
+    public boolean isChecked(){
+    	return is_checked;
+    }
+    public boolean isGood(){
+    	return is_good;
     }
     public void run()
     {
@@ -101,6 +114,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
                     url = new URL(downloadUrl);
                     conn = url.openConnection();
                     conn.setUseCaches(false);
+                    long lastmod = conn.getLastModified();
                     size = fileSize = conn.getContentLength();
                     if(target.exists()){
                     	target.delete();
@@ -144,7 +158,8 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
                     outStream.close();
                     fileStream.close();
                     inStream.close();
-                    
+                    boolean failed_lastmod = target.setLastModified(lastmod);
+                    Log.d(TAG,"failed_lastmod: "+failed_lastmod);
                     if(isCancelled())
                     {
                             // the download was canceled, so let's delete the partially downloaded file
@@ -197,6 +212,8 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 				}
 				
 			}
+			this.is_checked=true;
+	        this.is_good = true;
 			return true;
 		}
 		
@@ -214,6 +231,10 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 					System.getProperty("file.separator") + 
 					file.getName().replaceFirst(".zip", "") +
 					System.getProperty("file.separator");
+			
+			
+			File destination = new File(destinationPath);
+			recursiveDelete(destination);
 			new File(destinationPath).mkdirs();
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
 			
@@ -278,13 +299,31 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 		} 
 	}
 	
+	private void recursiveDelete(File destination) {
+		if(destination.exists()){
+			if(destination.isDirectory()){
+				for(File file: destination.listFiles()){
+					recursiveDelete(file);
+				}
+			}
+			destination.delete();
+		}
+
+	}
 	@Override
 	protected void onPostExecute(Boolean ret){
+		if(this.isCancelled()){
+			//cancalled, do nothing
+			return;
+		}
 		if(chk_file){
-			if(ret){
-				parentActivity.buildUI();
-			} else {
+			Log.d(TAG,"load alert and download"+ret);
+			if(!ret){
 				parentActivity.LargeFilerAlertAndDownload();
+				
+			}
+			else{
+				parentActivity.buildUI();
 			}
 		} else {
 			parentActivity.buildUI();

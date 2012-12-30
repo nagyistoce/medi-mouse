@@ -61,8 +61,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	
     	spref.registerOnSharedPreferenceChangeListener(this);
     	
-    	//client = medi_post.connect(username, password);
-		
+    	
     	me = new medi_person(this);
     	
     	//create list of linear layouts
@@ -126,7 +125,10 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         TextView tv = (TextView) ll.getChildAt(0).findViewById(R.id.name);
         tv.setTextColor(Color.GRAY);
         
-		trax_post.execute(me);
+        if(!shared.debug){
+        	//no need to test this, its working well.
+        	trax_post.execute(me);
+        }
 		reload(1);
 	}
     @Override
@@ -172,8 +174,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 	 * 
 	 */
     	@Override
-	public void onPostExecute(medi_person result) {
-		me = result;
+	public void onPostExecute(Object result) {
+		me = (medi_person)result;
 		if(reloading){
 			reloading=false;
 			LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);

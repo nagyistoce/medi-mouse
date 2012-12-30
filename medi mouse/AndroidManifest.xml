@@ -3,11 +3,12 @@
     package="medi.mouse"
 
     android:versionCode="27"
-    android:versionName="2.10" >
+    android:versionName="2.15" >
 
     <uses-sdk android:minSdkVersion="7" 
     	 	android:targetSdkVersion="11"/>
 	<supports-screens android:xlargeScreens="true" />
+	<supports-screens android:smallScreens="true" />
     <application
         android:name="MyApplication"
         android:icon="@drawable/medimouse"

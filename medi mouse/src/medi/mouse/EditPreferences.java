@@ -86,7 +86,7 @@ public class EditPreferences extends medi_mouse_activity {
 		commitChanges();
 	}
 	@Override
-	public void onPostExecute(medi_person result) {
+	public void onPostExecute(Object result) {
 		// TODO Auto-generated method stub
 		
 	}

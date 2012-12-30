@@ -3,24 +3,14 @@ package medi.mouse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -28,42 +18,24 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
-import org.apache.http.conn.ManagedClientConnection;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.BasicHttpContext;
 //import org.apache.commons.codec.binary.Base64;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Credentials;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewManager;
-import android.view.animation.AnimationUtils;
-import android.webkit.WebView;
-import android.widget.ArrayAdapter;
 //import android.widget.ImageView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,25 +45,29 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 	public static String SITE = "https://core.meditech.com/core-coreWebHH.desktop.mthh";
 	public static String SITE2= "https://core.meditech.com/signon.mthz";
 	public static String BASE = "https://core.meditech.com/";
-
+	public static String TAG = "core_post";
 	private Map<String,String> data;
-	private boolean is_lss = false;
+	
 	public static ClientConnectionManager CM=null;
 	BasicHttpContext mHttpContext;
 
 	private DefaultHttpClient mHttpClient;
 	private CookieStore  mCookieStore;
+	private String user;
+	private String pass;
 
+
+	
 	public core_post(boolean is_lss){
 
 		this.data=new HashMap<String, String>();
-		this.is_lss=is_lss;
 		mHttpContext = new BasicHttpContext();
 		mCookieStore = new BasicCookieStore();        
 		mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
 		mHttpClient = new DefaultHttpClient();
-
+		
+		
 
 	}
 
@@ -110,25 +86,27 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		try{
 			HttpPost post;
 			HttpGet httpget = new HttpGet(SITE);
+			Log.d(TAG,"first post");
 			HttpResponse response = mHttpClient.execute(httpget,this.mHttpContext);
 			HttpEntity entity = response.getEntity();
-
-			System.out.println("Login form get: " + response.getStatusLine());
+			this.user = username;
+			this.pass = password;
+			//System.out.println("Login form get: " + response.getStatusLine());
 			if (entity != null) {
 				entity.consumeContent();
 			}
-			System.out.println("Initial set of cookies:");
+			//System.out.println("Initial set of cookies:");
 			List<Cookie> cookies = mCookieStore.getCookies();
 			if (cookies.isEmpty()) {
-				System.out.println("None");
+				//System.out.println("None");
 			} else {
 				for (int i = 0; i < cookies.size(); i++) {
-					System.out.println("- " + cookies.get(i).toString());
+					//System.out.println("- " + cookies.get(i).toString());
 				}
 			}
 
-
-			System.out.println("==========second post");
+			Log.d(TAG,"second post");
+			//System.out.println("==========second post");
 			post = new HttpPost(SITE2);
 
 
@@ -162,6 +140,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			while((line=in.readLine())!=null) {
 				file += line;				
 			}
+			Log.d(TAG,"file: "+file);
 			response.getEntity().consumeContent();
 			int t1 = file.indexOf("./Images\\HHIcon_LogOutBig.png")-40;
 			if(t1>0){
@@ -169,6 +148,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 				int t2 = file.indexOf("\"",t1);
 				String logout = file.substring(t1,t2);
 				post = new HttpPost(BASE+logout);
+				Log.d(TAG,"logout" );
 				response = client.execute(post, mHttpContext);
 				
 				
@@ -181,7 +161,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 					file2 += line;				
 				}
 				response.getEntity().consumeContent();
-				Log.d("core_post","logout link"+ BASE+logout);
+				Log.d(TAG,"logout link"+ BASE+logout);
 				Log.d("core_post","logout link"+ file2);
 
 			}
@@ -191,11 +171,10 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}
 
 			in.close();
-			System.out.println(file);
-			System.out.println("==========done post");
+			
 			return file;
 		} catch (IOException e) {
-			System.out.println(":::"+e.getMessage());
+			Log.d(TAG,":::"+e.getMessage());
 			return "Network Error: "+e.getMessage();
 
 		}
@@ -206,24 +185,29 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 
 	@Override
 	protected medi_person doInBackground(medi_person... params) {
-		System.out.println("core post hurray!!");
+		
 		if(params.length>0){
 			medi_person me = params[0];
+			if(shared.debug){
+				return me;
+			}
+			SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(me.context);
+	    	user = spref.getString("user_name", "");
+	    	pass = spref.getString("user_password","");
+	    	
 			//actual fix for issue 1 (the easy way)
 			me.webview="Network Error: Failed to connect with core";
-			String user = me.is_lss?me.lss_core_username:me.username;
-			String pass = me.is_lss?me.lss_core_password:me.password;
+			
 			try {
-				System.out.println(1);
 				String ret = doSubmit(this.mHttpClient,"POST",user,
 						pass,me.context);
+				
 				me.webview=ret;
-				System.out.println(ret);
 			} catch (unauthorized e) {
-				System.out.println(2);
 				me.webview+=":  Unauthorized \nUsername/Password rejected";
 
 			}
+			
 			return me;
 
 		}
@@ -231,101 +215,119 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 	}
 	@Override
 	protected void onPostExecute(medi_person me)  {
-		int d;
-		final ArrayList<String> events = new ArrayList<String>();
-		String event_date;
-		String event_time;
-		String event_info_link;
-		String event_name;
-		String event_place;
-
+		final ArrayList<event> events = new ArrayList<event>();
 		//parse file for event info:
 		
 		//check for errors
 		int t = me.webview.indexOf("Network Error");
 		if(t!=-1&&t<10){
 			Toast.makeText(me.context, me.webview, Toast.LENGTH_LONG).show();
+			
+			//add test event
+			//events.add(new event("M123","420", "", "Fake event", "Gloucester (Framingham)"));
+			//loadUI(me,events);
 			if(me.webview.contains("Unauthorized")){
 				//coretrax_post will start this activity
 				//me.context.startActivity(new Intent(me.context, EditPreferences.class));
 			}
 		}else {
 			Toast.makeText(me.context, "connected to core", Toast.LENGTH_SHORT).show();
-
-			//start parsing dates
-			int c = me.webview.indexOf("<td class=\"style9\">");
-			int e = me.webview.indexOf("LogOutBig.png",c);
-			d = me.webview.indexOf("</td>", c);
-			c=c+"<td class=\"style9\">".length();
-			d = me.webview.indexOf("</td>", c);
-			
-			if(e<d||c>=me.webview.length()||c==-1||d==-1){
-				events.add("No Events");
-				
+			if(shared.debug){
+				//creating a fake event for testing
+				events.add(new event("today", "later", "none", "A event", "my desk's (Lowder Brook 100)"));
+				Log.d(TAG,events.get(0).toString());
+				loadUI(me,events);
 			} else {
-				event_date = me.webview.substring(c,d);
-
-				while (d != -1){
-
-					c = me.webview.indexOf("<td class=\"style12\">",d);
-
-
-					c=c+"<td class=\"style12\">".length();
-					d = me.webview.indexOf("</td>",c);
-					event_time = me.webview.substring(c,d);
-
-					c = me.webview.indexOf("<td class=\"style12\"><a href=\"",d);
-					c=c+"<td class=\"style12\"><a href=\"".length();
-					d = me.webview.indexOf("\">",c);
-					event_info_link = me.webview.substring(c,d);
-
-					c = d + "\">".length();
-					d = me.webview.indexOf("</a>",c);
-					event_name = me.webview.substring(c,d);
-
-					c = me.webview.indexOf("<td class=\"style12\">",d);
-					c=c+"<td class=\"style12\">".length();
-					d = me.webview.indexOf("</td>",c);
-					event_place = me.webview.substring(c,d);
-
-					//complete event should now have been read in
-					events.add(new event(event_date,event_time,event_info_link,
-							event_name,event_place).toString());
-
-
-					int c1 = me.webview.indexOf("<td class=\"style9\">",d);
-					int c2 = me.webview.indexOf("<td class=\"style12\">",d);
-					if (c2<c1 || (c1 == -1)){
-						//maybe read in more events on this date 
-						d = c2;
-					} else if (c1!=-1) {
-						//next date
-						c = c1;
-						c=c+"<td class=\"style9\">".length();
-						d = me.webview.indexOf("</td>", c);
-						event_date = me.webview.substring(c,d);
-
-					} else {
-						//done
-						d=-1;
-					}
-				}
-			}
-			LinearLayout ll = (LinearLayout) me.context.findViewById(R.id.core_view);
-			ll.removeAllViews();
-			for (int x = 0; x<events.size(); x++){
-				View v = me.context.getLayoutInflater().inflate(R.layout.menu, null);
-				TextView tv = (TextView) v.findViewById(R.id.name);
-				tv.setText(events.get(x)+"\n");
-				ll.addView(v, x);
-
+				//start parsing dates
+				parseEvents(me.webview,events);
+				loadUI(me,events);
 			}
 		}
 
 	}
+	private void parseEvents(String webview,ArrayList<event> events) {
+		String event_date;
+		String event_time;
+		String event_info_link;
+		String event_name;
+		String event_place;
+		int c = webview.indexOf("<td class=\"style9\">");
+		int e = webview.indexOf("LogOutBig.png",c);
+		int d = webview.indexOf("</td>", c);
+		c=c+"<td class=\"style9\">".length();
+		d = webview.indexOf("</td>", c);
+		
+		if(e<d||c>=webview.length()||c==-1||d==-1){
+			events.add(new event("No Events"));
+			
+		} else {
+			event_date = webview.substring(c,d);
+
+			while (d != -1){
+
+				c = webview.indexOf("<td class=\"style12\">",d);
+
+
+				c=c+"<td class=\"style12\">".length();
+				d = webview.indexOf("</td>",c);
+				event_time = webview.substring(c,d);
+
+				c = webview.indexOf("<td class=\"style12\"><a href=\"",d);
+				c=c+"<td class=\"style12\"><a href=\"".length();
+				d = webview.indexOf("\">",c);
+				event_info_link = webview.substring(c,d);
+
+				c = d + "\">".length();
+				d = webview.indexOf("</a>",c);
+				event_name = webview.substring(c,d);
+
+				c = webview.indexOf("<td class=\"style12\">",d);
+				c=c+"<td class=\"style12\">".length();
+				d = webview.indexOf("</td>",c);
+				event_place = webview.substring(c,d);
+
+				//complete event should now have been read in
+				events.add(new event(event_date,event_time,event_info_link,
+						event_name,event_place));
+
+
+				int c1 = webview.indexOf("<td class=\"style9\">",d);
+				int c2 = webview.indexOf("<td class=\"style12\">",d);
+				if (c2<c1 || (c1 == -1)){
+					//maybe read in more events on this date 
+					d = c2;
+				} else if (c1!=-1) {
+					//next date
+					c = c1;
+					c=c+"<td class=\"style9\">".length();
+					d = webview.indexOf("</td>", c);
+					event_date = webview.substring(c,d);
+
+				} else {
+					//done
+					d=-1;
+				}
+			}
+		}
+		
+
+		
+	}
+
+
+	private void loadUI(medi_person me, ArrayList<event> events){
+		LinearLayout ll = (LinearLayout) me.context.findViewById(R.id.core_view);
+		ll.removeAllViews();
+		for (int x = 0; x<events.size(); x++){
+			event ev = events.get(x);
+			View v = ev.toView(me.context);
+			ll.addView(v, x);
+
+		}
+	}
 
 	class event{
-		String event_date,event_time,event_info_link,event_name,event_place;
+		public String event_date,event_time,event_info_link,event_name,event_place;
 		boolean no_event;
 		ArrayList<String> ignored_words;
 		private HashMap<String, String> replace_words;
@@ -340,6 +342,8 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			this.replace_words = new HashMap<String,String>();
 			replace_words.put("&lt;", "<");
 			replace_words.put("&gt;", ">");
+			replace_words.put("&quot;", "\"");
+			replace_words.put("'", "\\'");
 			no_event = false;
 			this.event_date = fix(event_date);
 			this.event_time = fix(event_time);
@@ -350,23 +354,11 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 					
 		}
 		private String fix(String input){
-			for (int x = 0; x < ignored_words.size();x++){
-				String ignore = ignored_words.get(x);
-				int c = input.indexOf(ignore);
-				while (c!=-1){
-					input = input.substring(0, c) + input.substring(c+ignore.length());
-					c = input.indexOf(ignore);
-				}
-				
+			for (String key : ignored_words){
+				input = input.replaceAll(key, "");
 			}
 			for (String key : replace_words.keySet()) {
-				int c = input.indexOf(key);
-				while (c!=-1){
-					input = input.substring(0, c) + 
-							replace_words.get(key)+
-							input.substring(c+key.length());
-					c = input.indexOf(key);
-				}
+				input = input.replaceAll(key, replace_words.get(key));
 			}
 			return input;
 		}
@@ -375,14 +367,85 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			this.no_event = true;
 		}
 		public String toString(){
-			System.out.println(event_date+"\n"+event_time+"\n"+event_name+"\n"+event_place);
+			//System.out.println(event_date+"\n"+event_time+"\n"+event_name+"\n"+event_place);
+			
 			if (no_event){
 				return event_name;
 			} else if(event_place.length()>0) {
-				return event_date+" "+event_time+"\n"+event_name+"\n"+event_place;
+				return "event date: "+event_date+"\n"+
+						"event time: "+event_time+"\n"+
+						"event name: "+event_name+"\n"+
+						"event place: "+event_place;
 			} else {
 				return event_date+" "+event_time+"\n"+event_name;
 			}
+		}
+		public View toView(final medi_mouse_activity context){
+			View v = context.getLayoutInflater().inflate(R.layout.core_item, null);
+			TextView tv_name = (TextView) v.findViewById(R.id.name);
+			tv_name.setText(event_name);
+			
+			Log.d(TAG,"this event: "+this.toString());
+			if(no_event){
+				
+			}else if(event_date.length()>0){
+				TextView tv_start_time = (TextView) v.findViewById(R.id.start_time);
+				TextView tv_end_time = (TextView) v.findViewById(R.id.end_time);
+				Log.d(TAG,"set date: "+event_date+"+++"+event_time);
+				tv_start_time.setText(event_date+" "+event_time);
+				//tv_end_time.setText(event_date+" "+event_time);
+				//tv_end_time.setText(event_date+" "+event_time);
+			}else{
+				v.findViewById(R.id.time_wrapper).setVisibility(View.GONE);
+			}
+			final String building = parseBldg();
+			final String room = parseRoom();
+			if(building.length()>0&&room.length()>0){
+				TextView tv_place = (TextView) v.findViewById(R.id.location);
+				tv_place.setText(event_place);
+				ImageView iv = (ImageView) v.findViewById(R.id.map_icon);
+				
+				iv.setOnClickListener(new OnClickListener(){
+					
+					public void onClick(View v) {
+						//send place information to the facility viewer
+						//the facility viewer will need to use the facility post 
+						//methods to figure out where the rooms is.
+						Intent intent = new Intent(context, FacilityViewerActivity.class);
+					    intent.putExtra("core_post", true);
+					    intent.putExtra("layer", "core");
+					    intent.putExtra("building", building);
+					    intent.putExtra("name", room);
+					    
+					    context.startActivity(intent);
+						
+					}});
+						
+			} else {
+				v.findViewById(R.id.location_wrapper).setVisibility(View.GONE);
+				
+			}
+			
+			return v;
+		}
+		private String parseBldg(){
+			int start = event_place.indexOf("(");
+			int end = event_place.indexOf(")");
+			String ret = "";
+			if(start!=-1&&end!=-1&&start+1<end){
+				ret = event_place.substring(start+1, end);
+				return ret;
+			}
+			return "";
+		}
+		private String parseRoom(){
+			int end = event_place.indexOf("(");
+			String ret = event_place;
+			if(end!=-1){
+				ret = ret.substring(0, end);
+			}
+			return ret;
+			
 		}
 	}
 }

@@ -7,6 +7,6 @@
 		android:layout_marginBottom="15dp"
 		android:layout_marginRight="15dp"
 		android:layout_marginTop="15dp"
-		android:text="@string/large_download_confirm_message"/>
+		android:text="@string/no_locations_found_alert"/>
 
 </LinearLayout>

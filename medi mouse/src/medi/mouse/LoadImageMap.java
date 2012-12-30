@@ -66,7 +66,6 @@ public class LoadImageMap extends AsyncTask<String, Float, Bitmap> {
 	@Override
 	protected void onPostExecute(Bitmap result){
 		if (result != null) {
-			Log.d("LoadImageMap","drawing bitmap: "+dest+":"+result.getByteCount());
 			fv.highResListener(result,dest);
 		}
 		//this.mFacView.setBitmap(mBitmap);

@@ -1,45 +1,37 @@
 package medi.mouse;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
+import java.util.HashMap;
 
-import org.acra.ErrorReporter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.webkit.WebView;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FacilityViewerActivity extends medi_mouse_activity {
+public class FacilityViewerActivity extends medi_mouse_activity implements FacilityPostInterface{
 	public static final int MESSAGE_DOWNLOAD_STARTED = 1000;
     public static final int MESSAGE_DOWNLOAD_COMPLETE = 1001;
     public static final int MESSAGE_UPDATE_PROGRESS_BAR = 1002;
@@ -54,6 +46,15 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 	private Spinner facility_spinner;
 	private Spinner floor_spinner;
 	private ProgressBar progressBar;
+	private String locationToFind;
+	private String building;
+	private String layer;
+	private boolean isCore;
+	
+	boolean downloadIncomplete = true;
+	private Downloader download;
+	private boolean LFADopen;
+	private View LargeFilerAlertDialogView;
     
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,46 +62,76 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 		progressBar = (ProgressBar) findViewById(R.id.progress);
 		progressBar.setMax(100);
 		progressBar.setVisibility(View.GONE);
-		/*
-		 * download schematics
-		 * extract zips
-		 */
-		File appDir = new File(PATH);
 		
-		appDir.mkdirs();
-		File[] files = appDir.listFiles();
-		boolean found = false;
-		
-		
-		Downloader dl = new Downloader(FacilityViewerActivity.this, 
-				"http://medi-mouse.googlecode.com/files/schematics.zip", 
-				new File(PATH+"/schematics.zip"),
-				true);
-		dl.execute(0);
+		isCore = getIntent().getExtras().getBoolean("core_post", false);
+		if(isCore){
+			//intent created by core_post
+			//should include building and room name info
+			building = getIntent().getExtras().getString("building", "");
+			locationToFind = getIntent().getExtras().getString("name", "");
+			//layer name should be "core" if coming from core_post
+			layer = getIntent().getExtras().getString("layer", "");
+			startDownload(true);
+		} else {
+			/*
+			 * download schematics
+			 * extract zips
+			 */
+			File appDir = new File(PATH);
+			
+			appDir.mkdirs();
+			//chk file instance of downloader
+			//will check to see if the schematics.zip is at the correct file size
+			//if it isn't it will warn the user and download the new file.
+			startDownload(true);
+		}
 	
 				
 	}
+	private void lookup_place_and_view(String building, String name) {
+		Log.d(TAG,"looking up: "+building+":"+name);
+		new FacilityPost(this).execute(FacilityPost.lookupLocationByName(building,name));
+	}
 	public void LargeFilerAlertAndDownload(){
 		LayoutInflater inflater = LayoutInflater.from(this);
-	
-	   View alertDialogView = inflater.inflate(R.layout.large_file_alert, null);
-	   AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	   builder.setView(alertDialogView); 
-	    
-	   builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int which) {
-	        	progressBar.setVisibility(View.VISIBLE);
-	        	Downloader dl = new Downloader(FacilityViewerActivity.this, 
-						"http://medi-mouse.googlecode.com/files/schematics.zip", 
-						new File(PATH+"/schematics.zip"));
-				dl.execute(0);
+		
+		LargeFilerAlertDialogView = inflater.inflate(R.layout.large_file_alert, null);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(LargeFilerAlertDialogView); 
+		LFADopen = true;
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				startDownload(false);
+				LFADopen = false;
 	            dialog.cancel();
 	        }
 	    }).show();
-	   
+		
+		
+	}
+	
+	private void startDownload(boolean chk){
+		progressBar.setVisibility(View.VISIBLE);
+		download = new Downloader(FacilityViewerActivity.this, 
+				"http://medi-mouse.googlecode.com/files/schematics.zip", 
+				new File(shared.PATH+"/schematics.zip"),
+				chk);
+		download.execute(0);
 	}
 	public void buildUI(){
-		buildFacSpinners(PATH + "schematics");
+		if(isCore){
+			downloadIncomplete = false;
+			download=null;
+			Log.d(TAG,"locationToFind: "+building+":"+locationToFind);
+			lookup_place_and_view(building,locationToFind);
+		}else{
+			buildUI(null,null,null);
+		}
+	}
+	public void buildUI(HashMap<String,ArrayList<String>> floor_filter,
+			String building,
+			final String findMe){
+		buildFacSpinners(PATH + "schematics",floor_filter);
 		Button load = (Button) findViewById(R.id.load);
 		load.setOnClickListener(new OnClickListener(){
 
@@ -108,18 +139,35 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 				String image = PATH + "schematics/"+
 						facility_spinner.getSelectedItem()+"/"+ 
 						floor_spinner.getSelectedItem();
-				FacilityViewer fv = new FacilityViewer(FacilityViewerActivity.this,image);
-				LinearLayout ll = (LinearLayout) findViewById(R.id.main);
-				ll.removeAllViews();
-				ll.addView(fv);
+				String building = facility_spinner.getSelectedItem().toString();
+				FacilityViewerActivity.this.setContentView(R.layout.facility);
+				FacilityViewer fv;
+				TextView label = (TextView) findViewById(R.id.canvas_label);
+				LinearLayout hud_layout = (LinearLayout) findViewById(R.id.hud_layout);
+				
+				String floorname = image.substring(image.lastIndexOf("/")+1,image.lastIndexOf(".jpg"));
+				if(findMe!=null){
+					fv = new FacilityViewer(FacilityViewerActivity.this,image,building,findMe);
+					label.setText(building+":"+floorname+"\n"+findMe);
+				} else {
+					fv = new FacilityViewer(FacilityViewerActivity.this,image,facility_spinner.getSelectedItem().toString());
+					label.setText(building+":"+floorname);
+
+				}
+				RelativeLayout ll = (RelativeLayout) findViewById(R.id.main);
+
+				ll.addView(fv,0);
 				
 			}
 		
 		});
 
 	}
-	
 	private void buildFacSpinners(final String path){
+		buildFacSpinners(path,null);
+	}
+	private void buildFacSpinners(final String path,
+			final HashMap<String,ArrayList<String>> floor_filter){
 		Log.d("CoreActivity",":::"+path);
 		File file = new File(path);
 		facility_spinner = (Spinner) findViewById(R.id.fac_spinner);
@@ -128,7 +176,12 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 		ArrayList<String> fac = new ArrayList<String>();
 		
 		for(File f : files){
-			fac.add(f.getName());
+			Log.d(TAG,f.getName());
+			
+			if(floor_filter==null||floor_filter.containsKey(f.getName())) {
+				fac.add(f.getName());
+			}
+				
 		}
 		Collections.sort(fac);
 		
@@ -147,18 +200,32 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 				TextView tv = (TextView) arg0.findViewById(R.id.primary_text_item);
 				
 				Log.d("CoreActivity","text "+tv.getText());
-				FacilityViewerActivity.this.buildFloorSpinners(path+"/"+tv.getText());
+				if(floor_filter==null){
+					FacilityViewerActivity.this.buildFloorSpinners(path+"/"+tv.getText());
+				}else{
+					FacilityViewerActivity.this.buildFloorSpinners(path+"/"+tv.getText(),
+							floor_filter.get(tv.getText()));
+				}
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 				
 			}});
-		
+		if(facilities.length==0){
+			//no facilities found, quit
+			this.finish();
+		}else if(facilities.length==1){
+			facility_spinner.setOnClickListener(null);
+			facility_spinner.setOnTouchListener(null);
+		}
 		facility_spinner.setAdapter(adapter);
 			
 	}
 	protected void buildFloorSpinners(String path) {
+		buildFloorSpinners(path,null);
+		
+	}
+	protected void buildFloorSpinners(String path,ArrayList<String> filter) {
 		File file = new File(path);
 		floor_spinner = (Spinner) findViewById(R.id.floor_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner layout
@@ -167,7 +234,9 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 			String[] facilities = new String[files.length];
 			int x = 0;
 			for(File f : files){
-				facilities[x]=f.getName();
+				if(filter==null||filter.contains(f.getName())){
+					facilities[x]=f.getName();
+				}
 				Log.d("CoreActivity",x+":"+f.getName());
 				x++;
 			}
@@ -179,11 +248,145 @@ public class FacilityViewerActivity extends medi_mouse_activity {
 		}
 	}
 	
-	@Override
-	public void onPostExecute(medi_person result) {
+	public void PostExecute(JSONObject result) {
 		
+		JSONObject res = (JSONObject) result;
+		Log.d(TAG,"on post execute: "+res.toString());
+		String type;
+		try {
+			type = res.getString("type");
+			
+			if(type.compareTo("location_list")==0){
+				//returning from a lookup_location call
+				int places_num = res.getInt("places_num");
+				String building = res.getString("building");
+				if(places_num>0){
+					//some locations have been found 
+					ArrayList<Location> locations = new ArrayList<Location>();
+					ArrayList<Location> top_ranked = new ArrayList<Location>();
+					HashMap<String,Integer> image_ranks = new HashMap<String,Integer>();
+					
+					JSONArray list = res.getJSONArray("places");
+					int max = 0;
+					String maxFile = "";
+					for(int x=0;x<list.length();x++){
+						//create an array list of FacilityViewer.locations
+						JSONObject place = list.getJSONObject(x);
+						JSONObject pos = place.getJSONObject("position");
+						float pos_x = new Float(pos.getString("x"));
+						float pos_y = new Float(pos.getString("y"));
+						String name = place.getString("name");
+						String filename = place.getString("image");
+						String layer = place.getString("layer");
+						int rank = place.getInt("rank");
+						int t = 0;
+						if(image_ranks.containsKey(filename)){
+							t = image_ranks.get(filename)+rank;
+							image_ranks.put(filename, t);
+						} else {
+							t = rank;
+							image_ranks.put(filename, rank);
+						}
+						if(t>max){
+							max = t;
+							maxFile = filename;
+						}
+						Location loc = new Location(pos_x, pos_y, rank, name, building, filename, layer);
+						
+						locations.add(loc);
+					}
+					ArrayList<String> num_hits = new ArrayList<String>(); 
+					for(Location location: locations){
+						String filename = location.getFilename();
+						Log.d(TAG,"filename: "+filename+"\nmax: "+maxFile+"\nthis: "+
+								location.getRank());
+						if(location.getRank()<0){
+							//this location obviously sucks, don't even bother
+							continue;
+						}
+						if(filename.compareTo(maxFile)==0){
+							top_ranked.add(location);
+							if(!num_hits.contains(filename)){
+								num_hits.add(shared.PATH+filename);
+							}
+						}
+					}
+					
+					Log.d(TAG,"hits: "+num_hits.size());
+					//if only one image file is used for each location in list, 
+					//load file and display all 
+					//if multiple image files exist, load file with highest ranking
+					if(num_hits.size()==1){
+						Log.d(TAG,"loading facilityViewer: "+top_ranked.size());
+						setContentView(R.layout.facility);
+						FacilityViewer fv = new FacilityViewer(FacilityViewerActivity.this,
+								top_ranked,
+								num_hits.get(0),
+								building);
+						RelativeLayout ll = (RelativeLayout) findViewById(R.id.main);
+						//ll.removeAllViews();
+						TextView tv = (TextView) findViewById(R.id.canvas_label);
+						String image = num_hits.get(0);
+						String floorname = image.substring(image.lastIndexOf("/")+1,image.lastIndexOf(".jpg"));
+						tv.setText(building+":"+floorname);
+						ll.addView(fv,0);
+					}else if(num_hits.size()>1){
+						Log.d(TAG,"to many hits");
+						//if multiple image files exist with the same ranking, 
+						//load UI and have the user choose a map
+						
+						HashMap<String,ArrayList<String>> filter =
+								new HashMap<String,ArrayList<String>>();
+						filter.put(building, num_hits);
+						buildUI(filter,building, null);
+						
+					}else{
+						buildUI(null,null,null);
+					}
+					
+					
+				} else {
+					//No locations found
+					Log.d(TAG,"no locations found: "+locationToFind);
+					NoLocationsFoundAlert(building,locationToFind);
+				}
+				
+			} else if(type=="layer_list"){
+				if(res.getInt("layer_num")>0){
+					JSONArray list = res.getJSONArray("layers");
+				
+					for(int x=0;x<list.length();x++){
+						
+					}
+				}
+			} else if(type=="location_saved"){
+				//location has been saved
+				
+				//TODO:
+				//notify user of the success 
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
+	private void NoLocationsFoundAlert(final String building,
+			final String locationToFind) {
+		final HashMap<String,ArrayList<String>> filter = new HashMap<String,ArrayList<String>>();
+		filter.put(building, null);
+		LayoutInflater inflater = LayoutInflater.from(this);
+
+		View alertDialogView = inflater.inflate(R.layout.no_locations_found_alert, null);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setView(alertDialogView); 
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) {
+	        	
+	        	buildUI(filter,building,locationToFind);
+	        }
+	    }).show();
+	}
+
 	/**
      * This is the Handler for this activity. It will receive messages from the
      * DownloaderThread and make the necessary updates to the UI.
@@ -215,5 +418,14 @@ public class FacilityViewerActivity extends medi_mouse_activity {
                 //Toast.makeText(CoreActivity.this, "message: "+msg.what, Toast.LENGTH_LONG).show();
         }
     };
+
+	@Override
+	public void onPostExecute(Object result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+    
 
 }

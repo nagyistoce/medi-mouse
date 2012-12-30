@@ -25,8 +25,9 @@ public abstract class medi_mouse_activity extends Activity {
 	protected Activity context;
 	protected HttpClient client;
 	protected medi_person me;
+	protected String TAG = "medi_mouse_activity";
 	
-	public abstract void onPostExecute(medi_person result);
+	public abstract void onPostExecute(Object result);
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,7 +82,7 @@ public abstract class medi_mouse_activity extends Activity {
                 return true;
             case R.id.maps:
             	intent = new Intent(this, FacilityViewerActivity.class);
-            	intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            	intent.putExtra("core_post", false);
             	startActivity(intent);
                 return true;
             case R.id.helpabout:
@@ -90,7 +91,9 @@ public abstract class medi_mouse_activity extends Activity {
                 View alertDialogView = inflater.inflate(R.layout.alert_dialog_layout, null);
 
                 WebView myWebView = (WebView) alertDialogView.findViewById(R.id.DialogWebView);
-                
+                //String webView = getString(R.string.help_about_html);
+                //Log.d(TAG,webView);
+                //myWebView.loadData(webView, "text/html", "utf-8");
                 myWebView.loadUrl("file:///android_asset/help_about.html");  
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 Button report = (Button) alertDialogView.findViewById(R.id.crash_report);
