@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -76,6 +77,7 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 	private CharSequence floorname;
 	private boolean confirming;
 	private FacilityViewerActivity context;
+	private boolean dontLoadNewLocations;
 	
 	public FacilityViewer(Context context) {
 		this(context,null,0);
@@ -132,6 +134,7 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 			String building){
 		this(context,filename,building);
 		this.locations = locations;
+		this.dontLoadNewLocations = true;
 		loadFile(context,filename);
 	}
 	public void lookupLayers(String filename){
@@ -301,9 +304,13 @@ public class FacilityViewer extends View implements FacilityPostInterface{
         spot.x=(int) x;
         spot.y=(int) y;
         markSpot = true;
-        if(vibrator.hasVibrator()){
-			vibrator.vibrate(100);
-		}
+        try{
+	        if(vibrator.hasVibrator()){
+				vibrator.vibrate(100);
+			}
+        }catch (NoSuchMethodError e){
+        	//no vibrator :(
+        }
         invalidate();
 
 		
@@ -374,9 +381,11 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 			
 		}
 		
-		//Log.d("FacilityViewer","bounds: "+clipBounds_canvas);
+		
 		if(locations!=null){
+			Log.d(TAG,"locations: "+locations.size());
 			for(Location location: locations){
+				
 				location.render(canvas, this, low_width, low_height);
 			}
 		}
@@ -466,21 +475,19 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 		building_name_view.setText(building);
 		if(building!=null){
 			building_name_view.setText(building);
-			building_name_view.setClickable(false);
-			building_name_view.setOnClickListener(null);
+			building_name_view.setEnabled(false);
 		}
 		final EditText room_name_view = (EditText)alertDialogView.findViewById(R.id.room_name);
 		if(name!=null){
 			room_name_view.setText(name);
-			room_name_view.setClickable(false);
-			room_name_view.setOnClickListener(null);
+			room_name_view.setEnabled(false);
+			
 		}
 		
 		final EditText layer_name_view = (EditText)alertDialogView.findViewById(R.id.layer_name);
 		if(name!=null){
 			layer_name_view.setText("core");
-			layer_name_view.setClickable(false);
-			layer_name_view.setOnClickListener(null);
+			layer_name_view.setEnabled(false);
 		}
 		
 		//-------------------------------------------------------------------------------
@@ -555,6 +562,9 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 		
 	}
 	public void PostExecute(JSONObject result) {
+		if(dontLoadNewLocations){
+			return;
+		}
 		if(result.has("type")){
 			String type;
 			try {
@@ -580,6 +590,7 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 									int arg2, long arg3) {
 								TextView tv = (TextView) arg0.findViewById(R.id.primary_text_item);
 								String layer = (String) tv.getText();
+								
 								FacilityPost fp = new FacilityPost(FacilityViewer.this);
 								fp.execute(FacilityPost.lookupLocationByLayer(filename, layer));
 							}
@@ -592,6 +603,7 @@ public class FacilityViewer extends View implements FacilityPostInterface{
 					}
 				} else if(type.compareTo("location_list")==0){
 					//returning from a lookup_location call
+					
 					int places_num = result.getInt("places_num");
 					String building = result.getString("building");
 					if(places_num>0){

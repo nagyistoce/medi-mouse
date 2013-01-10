@@ -7,6 +7,8 @@
 		android:layout_marginBottom="15dp"
 		android:layout_marginRight="15dp"
 		android:layout_marginTop="15dp"
+		android:layout_width="wrap_content"
+		android:scrollHorizontally="false"
 		android:text="@string/no_locations_found_alert"/>
 
 </LinearLayout>

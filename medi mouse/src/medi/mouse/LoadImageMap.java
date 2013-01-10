@@ -59,7 +59,10 @@ public class LoadImageMap extends AsyncTask<String, Float, Bitmap> {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		} catch (IllegalArgumentException e){
+			//rectangle is outside of image
+			//do nothing
+		}
 		return null;
 	}
 

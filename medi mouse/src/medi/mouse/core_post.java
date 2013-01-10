@@ -343,6 +343,7 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			replace_words.put("&lt;", "<");
 			replace_words.put("&gt;", ">");
 			replace_words.put("&quot;", "\"");
+			replace_words.put("&amp;", "&");
 			replace_words.put("'", "\\'");
 			no_event = false;
 			this.event_date = fix(event_date);
@@ -364,6 +365,10 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 		}
 		public event(String name) {
 			this.event_name = name;
+			event_place="";
+			event_time="";
+			event_date="";
+			event_info_link="";
 			this.no_event = true;
 		}
 		public String toString(){
@@ -387,7 +392,9 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			
 			Log.d(TAG,"this event: "+this.toString());
 			if(no_event){
-				
+				v.findViewById(R.id.time_wrapper).setVisibility(View.GONE);
+				v.findViewById(R.id.location_wrapper).setVisibility(View.GONE);
+				return v;
 			}else if(event_date.length()>0){
 				TextView tv_start_time = (TextView) v.findViewById(R.id.start_time);
 				TextView tv_end_time = (TextView) v.findViewById(R.id.end_time);
@@ -398,6 +405,8 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 			}else{
 				v.findViewById(R.id.time_wrapper).setVisibility(View.GONE);
 			}
+			
+
 			final String building = parseBldg();
 			final String room = parseRoom();
 			if(building.length()>0&&room.length()>0){
@@ -420,7 +429,11 @@ public class core_post extends AsyncTask<medi_person,Integer,medi_person>{
 					    context.startActivity(intent);
 						
 					}});
-						
+			}else if (event_place.length()>0) {
+				TextView tv_place = (TextView) v.findViewById(R.id.location);
+				tv_place.setText(event_place);
+				ImageView iv = (ImageView) v.findViewById(R.id.map_icon);
+				iv.setVisibility(View.GONE);
 			} else {
 				v.findViewById(R.id.location_wrapper).setVisibility(View.GONE);
 				

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 <color name="theme_color">#000000</color>
-<style name="Theme" parent="android:Theme.Black.NoTitleBar">
+<style name="Theme" parent="android:Theme.Holo">
     <item name="android:windowBackground">@color/theme_color</item>
     <item name="android:colorBackground">@color/theme_color</item>
     <item name="android:layout_width">fill_parent</item>

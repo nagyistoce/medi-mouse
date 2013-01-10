@@ -79,18 +79,12 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        this.is_checked=true;
-        this.is_good = ret;
+
         Log.d(TAG,"is_good: "+ret);
         return ret;
         
     }
-    public boolean isChecked(){
-    	return is_checked;
-    }
-    public boolean isGood(){
-    	return is_good;
-    }
+ 
     public void run()
     {
             URL url;
@@ -185,7 +179,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
                                     0, 0, errMsg);
                     parentActivity.activityHandler.sendMessage(msg); 
             } catch (IOException e) {
-				// TODO Auto-generated catch block
+            	target.delete();
 				e.printStackTrace();
 			}
             
@@ -195,7 +189,11 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 	@Override
 	protected Boolean doInBackground(Integer... params) {
 		if(chk_file){
-			return chk_file();
+			boolean is_good = chk_file();
+			if(is_good){
+				extract(target);
+			}
+			return is_good;
 		}else{
 			run();
 			Log.d("Downloader","done...");
@@ -212,8 +210,6 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 				}
 				
 			}
-			this.is_checked=true;
-	        this.is_good = true;
 			return true;
 		}
 		

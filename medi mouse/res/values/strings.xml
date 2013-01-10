@@ -12,8 +12,9 @@
 	</string>
 	
 	<string name="no_locations_found_alert">
-	I don\'t know where this location is.  Would you like to find it for me?\n
-	Thanks
+I don\'t know where this location is.  Would you like to find it for me?\n\n
+Once you find the right location, longpress on the map to save it and other people can find it too!\n\n
+If you find a location that is incorrect you can tap it and vote it down and/or select a different location.\n
 	</string>
 	
 	<string name="location_confirmation">

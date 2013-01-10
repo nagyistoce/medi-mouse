@@ -67,10 +67,10 @@ public class FacilityViewerActivity extends medi_mouse_activity implements Facil
 		if(isCore){
 			//intent created by core_post
 			//should include building and room name info
-			building = getIntent().getExtras().getString("building", "");
-			locationToFind = getIntent().getExtras().getString("name", "");
+			building = getIntent().getExtras().getString("building");
+			locationToFind = getIntent().getExtras().getString("name");
 			//layer name should be "core" if coming from core_post
-			layer = getIntent().getExtras().getString("layer", "");
+			layer = getIntent().getExtras().getString("layer");
 			startDownload(true);
 		} else {
 			/*
@@ -174,7 +174,9 @@ public class FacilityViewerActivity extends medi_mouse_activity implements Facil
 		// Create an ArrayAdapter using the string array and a default spinner layout
 		File[] files = file.listFiles();
 		ArrayList<String> fac = new ArrayList<String>();
-		
+		if(files==null){
+			return;
+		}
 		for(File f : files){
 			Log.d(TAG,f.getName());
 			
@@ -185,15 +187,25 @@ public class FacilityViewerActivity extends medi_mouse_activity implements Facil
 		}
 		Collections.sort(fac);
 		
-		String[] facilities = new String[files.length];
+		String[] facilities = new String[fac.size()];
 		int x = 0;
 		for(String f : fac){
+			Log.d(TAG,x+": "+f);
 			facilities[x]=f;
 			x++;
 		}
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.list_item, facilities);
-		facility_spinner.setSelected(false);
+		
+		if(facilities.length==0){
+			//no facilities found, quit
+
+			Toast.makeText(this, "Unknown Facility, giving up...", Toast.LENGTH_LONG).show();			
+			this.finish();
+		}else if (facilities.length==1){
+			facility_spinner.setEnabled(false);
+		}
+		
 		facility_spinner.setOnItemSelectedListener(new OnItemSelectedListener(){
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
@@ -211,15 +223,9 @@ public class FacilityViewerActivity extends medi_mouse_activity implements Facil
 			public void onNothingSelected(AdapterView<?> arg0) {
 				
 			}});
-		if(facilities.length==0){
-			//no facilities found, quit
-			this.finish();
-		}else if(facilities.length==1){
-			facility_spinner.setOnClickListener(null);
-			facility_spinner.setOnTouchListener(null);
-		}
-		facility_spinner.setAdapter(adapter);
-			
+	
+	facility_spinner.setAdapter(adapter);
+	
 	}
 	protected void buildFloorSpinners(String path) {
 		buildFloorSpinners(path,null);

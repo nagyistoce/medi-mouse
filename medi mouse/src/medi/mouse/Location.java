@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.view.View;
 
 public class Location{
@@ -17,6 +18,7 @@ public class Location{
 	private String building;
 	private String layer;
 	private int rank;
+	private static String TAG = "Location";
 	public Location(float pos_x,float pos_y,
 			int rank,
 			String tag,
@@ -88,8 +90,9 @@ public class Location{
 
 		//BitmapFactory.Options opts = new BitmapFactory.Options();
 		//opts.inDensity=1;
-		
+		Log.d(TAG,"location: "+x+","+y+":"+img);
 		Bitmap icon = BitmapFactory.decodeResource(view.getResources(),img);
+		
 		canvas.drawBitmap(icon, x-icon.getWidth()/2,y-icon.getHeight()/2,null);
 
 	}

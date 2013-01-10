@@ -125,7 +125,6 @@ public class EditStatus extends medi_mouse_activity {
 		public menu_node(String[] options) {
 			this.options=options;
 			this.doSubmit = true;
-			Log.d("EditStatus","1"+doSubmit+this.options[0]);
 		}
 		public menu_node(String[] options,menu_node future) {
 			this.options=options;
@@ -133,12 +132,10 @@ public class EditStatus extends medi_mouse_activity {
 			for(int x = 0; x<options.length;x++){
 				futures[x]=future;
 			}
-			Log.d("EditStatus","2"+doSubmit+this.options[0]);
 		}
 		public menu_node(String[] options,menu_node[] futures){
 			this.options=options;
 			this.futures=futures;
-			Log.d("EditStatus","3"+doSubmit+this.options[0]);
 		}
 		public void display(ArrayList<String> prefix,ArrayList<Integer> selection){
 			

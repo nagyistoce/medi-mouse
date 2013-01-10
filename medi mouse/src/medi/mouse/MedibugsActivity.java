@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -82,8 +83,21 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 			}});
         
         ll.addView(v, 0);
-        ll.forceLayout();
         
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.HONEYCOMB){
+        	v = this.getLayoutInflater().inflate(R.layout.menu, null);
+	        TextView inout = (TextView) v.findViewById(R.id.name);
+	        inout.setText("In/Out");
+	        
+	        inout.setOnClickListener(new OnClickListener(){
+				public void onClick(View arg0) {
+					Intent intent = new Intent(MedibugsActivity.this,EditStatus.class);
+	        		startActivity(intent);
+				}});
+	        
+	        ll.addView(v, 1);
+        }
+        ll.forceLayout();
         //screen refresh
         
         reload();

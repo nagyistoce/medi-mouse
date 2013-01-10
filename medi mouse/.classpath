@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="C:/Users/will/android-sdks/extras/android/support/v13/android-support-v13.jar"/>
+	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-17/android.jar"/>
+	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-15/android.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="C:/Users/will/git/medi mouse/medi mouse/libs/android-support-v4.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="lib" path="acra-4.2.3.zip"/>
-	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-15/android.jar"/>
 	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-7/android.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://developer.android.com/reference/"/>
