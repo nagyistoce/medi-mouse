@@ -188,11 +188,15 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
     
 	@Override
 	protected Boolean doInBackground(Integer... params) {
+		String destinationPath = parentActivity.PATH +
+				System.getProperty("file.separator") + 
+				target.getName().replaceFirst(".zip", "") +
+				System.getProperty("file.separator");
+		
+		
+		File destination = new File(destinationPath);
 		if(chk_file){
 			boolean is_good = chk_file();
-			if(is_good){
-				extract(target);
-			}
 			return is_good;
 		}else{
 			run();
@@ -205,7 +209,9 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 				for(File f : files){
 					if(f.toString().compareTo(target.toString())==0){
 						found=true;
-						extract(target);
+						
+						recursiveDelete(destination);
+						extract(target,destination);
 					}
 				}
 				
@@ -214,8 +220,8 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 		}
 		
 	}
-	
-	private void extract(File file){
+
+	private void extract(File file,File destination){
 		try {
 			Message msg;
 			msg = Message.obtain(parentActivity.activityHandler,
@@ -223,36 +229,36 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
                     0, 0);
 			Log.d(TAG,"start extract");
 			parentActivity.activityHandler.sendMessage(msg); 
-			String destinationPath = parentActivity.PATH +
-					System.getProperty("file.separator") + 
-					file.getName().replaceFirst(".zip", "") +
-					System.getProperty("file.separator");
 			
 			
-			File destination = new File(destinationPath);
-			recursiveDelete(destination);
-			new File(destinationPath).mkdirs();
+			destination.mkdirs();
 			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
 			
 			size *= 1.25;
-			ZipEntry entry = zis.getNextEntry();
+			ZipEntry entry;
 			byte[] buf = new byte[1024];
 			int totalReadIn=0;
-			while(entry!=null){
-				String outFilePath = destinationPath + 
-						 entry.getName();
+			while((entry = zis.getNextEntry()) != null){
+				String outFilePath = destination + 
+						System.getProperty("file.separator") +
+						entry.getName();
+				File outFile = new File(outFilePath);
 				if(entry.isDirectory()){
-					new File(destinationPath+entry.getName()).mkdirs();
-					//Log.d("Downloader","Create dir: "+entry.getName());
-					entry = zis.getNextEntry();
+					if(outFile.exists()){
+						//already created
+						
+					}else{
+						outFile.mkdirs();
+					}
+					Log.d(TAG,"Create dir: "+entry.getName());
+					
 					continue;
+					
 				}
 				Log.d(TAG,"Extracting "+outFilePath);
-				File outFile = new File(outFilePath);
+				
 				if(outFile.exists()&&outFile.length()==entry.getSize()){
-					//already extracted
-					
-					entry = zis.getNextEntry();
+					//already extracted\
 					totalReadIn+=outFile.length();
 					Log.d(TAG,"already extracted, skipping..."+(int)(((float)totalReadIn/size)*100));
 
@@ -269,6 +275,7 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 				while ((n = zis.read(buf, 0, 1024)) > -1)
 	                    fileoutputstream.write(buf, 0, n);
 				
+				zis.closeEntry();
 				fileoutputstream.close();
 				
 				totalReadIn+=outFile.length();
@@ -278,10 +285,8 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
                         (int)(((float)totalReadIn/size)*100), 0);
 				parentActivity.activityHandler.sendMessage(msg);
 				Log.d("CoreActivity","Done");
-				entry = zis.getNextEntry();
 				
 			}
-			zis.close();
 			Log.d(TAG,"Extraction complete");
 			msg = Message.obtain(parentActivity.activityHandler,
                     FacilityViewerActivity.MESSAGE_EXTRACTION_COMPLETED,
@@ -289,8 +294,12 @@ public class Downloader extends AsyncTask<Integer,Integer,Boolean> {
 			parentActivity.activityHandler.sendMessage(msg);
             
 		} catch (ZipException e) {
+			//problem with the zip file
+			target.delete();
+			recursiveDelete(destination);
 			e.printStackTrace();
 		} catch (IOException e) {
+			recursiveDelete(destination);
 			e.printStackTrace();
 		} 
 	}
