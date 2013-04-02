@@ -3,6 +3,8 @@ package medi.mouse;
 
 import java.util.ArrayList;
 import org.acra.ErrorReporter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -27,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MedibugsActivity extends medi_mouse_activity implements OnSharedPreferenceChangeListener{
 
@@ -51,7 +54,7 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         
         //------------------------------------------------------------------------------------------
-        //establish connection to server
+        //establish connection to wcohenserver
         
         
     	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
@@ -102,8 +105,8 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
         
         reload();
         if(enable_core){
-        	core_post cpost = new core_post(false);
-        	cpost.execute(me);
+        	//core_post cpost = new core_post(false);
+        	//cpost.execute(me);
         }
     	
     	//----------------------------------------------------------------------------------------
@@ -133,15 +136,19 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	me.username=username;
 		me.password=password;
 		
-		trax_post = new coretrax_post();
+		trax_post = new coretrax_post(this);
 		this.reloading = true;
 		LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);
         TextView tv = (TextView) ll.getChildAt(0).findViewById(R.id.name);
         tv.setTextColor(Color.GRAY);
         
         if(!shared.debug){
-        	//no need to test this, its working well.
-        	trax_post.execute(me);
+        	//debug required
+        	trax_post.execute("get_status",
+        			username,
+        			password,
+        			null,
+        			null);
         }
 		reload(1);
 	}
@@ -159,16 +166,15 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
     	SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
         me.full_name = spref.getString("full_name", "");
         me.status = spref.getString("status", "");
-        me.date = spref.getString("date", "");
+        //me.date = spref.getString("date", "");
     	
     	name_view = (TextView) findViewById(R.id.name_view);
         status_view = (TextView) findViewById(R.id.status_view);
-        date_view = (TextView) findViewById(R.id.date_view);
         picture = (ImageView) findViewById(R.id.picture_view);
         
     	name_view.setText(me.full_name);
     	status_view.setText(me.status);
-    	date_view.setText(me.date);
+    	//date_view.setText(me.date);
     	
     	status_view.refreshDrawableState();
 
@@ -189,7 +195,33 @@ public class MedibugsActivity extends medi_mouse_activity implements OnSharedPre
 	 */
     	@Override
 	public void onPostExecute(Object result) {
-		me = (medi_person)result;
+		JSONObject res = (JSONObject)result;
+		//this activity only calls get_status
+		try {
+			if(res.has("error")){
+				//there was an error of some kind
+				//notify user
+				String error = res.getString("error");
+				String detail = res.getString("detail");
+				Toast.makeText(this, error+": "+detail, Toast.LENGTH_SHORT).show();
+			} else {
+				String status = res.getString("status");
+				String full_name = res.getString("full_name");
+			
+				SharedPreferences spref=
+						PreferenceManager.getDefaultSharedPreferences(me.context);
+
+				SharedPreferences.Editor editor = spref.edit();
+				editor.putString("full_name", full_name);
+				editor.putString("status", status);
+				
+				editor.commit();
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(reloading){
 			reloading=false;
 			LinearLayout ll = (LinearLayout) findViewById(R.id.options_menu_view);

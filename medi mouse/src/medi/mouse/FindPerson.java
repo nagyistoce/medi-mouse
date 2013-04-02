@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-import medi.mouse.EditStatus.menu_node;
-
-
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
@@ -36,7 +33,7 @@ import android.widget.TextView.OnEditorActionListener;
 public class FindPerson extends medi_mouse_activity {
 	private static final float TRANS_START = -25;
 	private static final long TRANS_DUR = 1000;
-	menu_node root,current;
+	
 	
 	
 	String stafflink,myStafflink;
