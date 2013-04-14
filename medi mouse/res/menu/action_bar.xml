@@ -10,9 +10,9 @@
     	  android:showAsAction="always|withText"
           android:title="Settings" />
     
-    <item android:id="@+id/helpabout"
+    <item android:id="@+id/bugreport"
     	  android:showAsAction="ifRoom|withText"
-          android:title="Help/About" />
+          android:title="Report Bug" />
     <item android:id="@+id/core"
     	  android:showAsAction="ifRoom|withText"
           android:title="Core" />

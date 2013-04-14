@@ -22,6 +22,7 @@ public class coretrax_resp {
 		} catch (JSONException e) {
 			HashMap<String,String> error = new HashMap<String,String>();
 			error.put("error","malformed JSON string");
+			error.put("detail",data);
 			
 			ret = new JSONObject(error);
 		}

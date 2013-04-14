@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/MainFrame"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFFFFFFF"
+    android:orientation="vertical" >
+
+   	<LinearLayout
+   		android:padding="15dip"
+   		android:id="@+id/MainLinearLayout"
+   		android:layout_width="fill_parent"
+   		android:layout_height="fill_parent"
+   		android:orientation="vertical">
+
+   		<TextView
+   		    android:text="Tell me some more about your problem or feature request"
+   		    android:textColor="#FF000000" />
+
+   		<EditText
+   			android:textColor="#FF000000"
+   			android:layout_height="wrap_content"
+   			android:id="@+id/bugDescription"/>
+   		<Button
+   		    android:id="@+id/send"
+   		    android:text="Send Email"/>
+   	</LinearLayout>
+</FrameLayout>

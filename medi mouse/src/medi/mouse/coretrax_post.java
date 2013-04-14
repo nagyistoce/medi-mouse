@@ -3,6 +3,7 @@ package medi.mouse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -11,10 +12,12 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 public class coretrax_post 
 		extends AsyncTask<coretrax_args,
@@ -36,18 +39,18 @@ public class coretrax_post
 	public void execute(String type,
 			String username, 
 			String password,
-			String[] path,
+			ArrayList<String> path,
 			HashMap<String,String> extra){
 		
 		coretrax_args arg = new coretrax_args(type,username,password,path,extra);
 		super.execute(arg);
 	}
-	public void execute(coretrax_args arg){
-		super.execute(arg);
-	}
+	
 	@Override
 	protected coretrax_resp doInBackground(coretrax_args... arg0) {
+		Log.d(TAG,"posting: "+arg0[0].getData().toString());
 		String resp = makeRequest(SITE,arg0[0].getData());
+		//String resp = "{\"error\":\"fake post\"}";
 		return new coretrax_resp(resp,arg0[0].pos);
 		
 	}
@@ -58,6 +61,9 @@ public class coretrax_post
 		
 		StringEntity se;
 		try {
+			
+			
+			
 			se = new StringEntity(params.toString());
 		
 			httpost.setEntity(se);
@@ -79,20 +85,32 @@ public class coretrax_post
 			
 			
 			return file;
+			
 		
 		}catch (ClientProtocolException e) {
 			error = e.getMessage();
 			//e.printStackTrace();
+			 
+			
 		} catch (IOException e) {
 			error = e.getMessage();
 			//e.printStackTrace();
 		}
 		
-		return "{\"error\": \"network error\",\"message\":\""+error+"\"}";
+		return "{\"error\": \"network error\",\"detail\":\""+error.replaceAll("\"","'")+"\"}";
 	} 
 	@Override
 	protected void onPostExecute(coretrax_resp resp)  {
-
+		JSONObject data = resp.getData();
+		Log.d(TAG,data.toString());
+		if(resp.getData().has("error")){
+			try {
+				Toast.makeText(context.getApplicationContext(), data.getString("error")+": "+data.getString("detail"), Toast.LENGTH_LONG).show();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
         this.context.onPostExecute(resp);
 	}
 	
