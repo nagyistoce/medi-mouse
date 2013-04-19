@@ -59,7 +59,13 @@ public class EditPreferences extends medi_mouse_activity {
 		passwordView = createEditText();
 		passwordView.setText(password);
 		passwordView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+		
+		View usernameLabel = createTextView("username");
+		View passwordLabel = createTextView("password");
+		
+		TableView.addView(usernameLabel);
 		TableView.addView(usernameView);
+		TableView.addView(passwordLabel);
 		TableView.addView(passwordView);
 		MainView.addView(info);
 		

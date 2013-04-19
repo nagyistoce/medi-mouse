@@ -26,14 +26,15 @@ public class coretrax_post
 	private static String TAG = "coretrax_post";
 	private static String SITE= "https://corebackend.appspot.com/handler.html";
 	//private static String SITE= "http://localhost:9080/handler.html";
-	
 	public static ClientConnectionManager CM=null;
 	private medi_mouse_activity context;
+	private static String USER_AGENT = "medi.mouse";
 	BasicHttpContext mHttpContext;
 
 	public coretrax_post(medi_mouse_activity context){
 		
 		this.context = context;
+		USER_AGENT = USER_AGENT +":"+context.getVersion();
 	}
 	
 	public void execute(String type,
@@ -68,7 +69,7 @@ public class coretrax_post
 		
 			httpost.setEntity(se);
 			httpost.setHeader("Content-type", "application/json");
-			
+			httpost.setHeader("User-Agent",USER_AGENT);
 			HttpResponse response = httpclient.execute(httpost);
 			
 			String file = "";
@@ -110,6 +111,8 @@ public class coretrax_post
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}else{
+			Toast.makeText(context.getApplicationContext(), "Success!", Toast.LENGTH_SHORT).show();
 		}
         this.context.onPostExecute(resp);
 	}

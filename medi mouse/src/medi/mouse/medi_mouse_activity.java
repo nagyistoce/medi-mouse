@@ -1,10 +1,13 @@
 package medi.mouse;
 
+import medi.mouse.EditPreferences.ColorInterface;
+
 import org.acra.ErrorReporter;
 import org.apache.http.client.HttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +30,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -154,7 +159,7 @@ public abstract class medi_mouse_activity extends Activity {
     protected TextView createTextView(){
 		TextView ret = new TextView(this);
 		ret.setTextColor(toColor(text_color));
-		ret.setTextSize(15);
+		ret.setTextSize(20);
 		return ret;
 	}
     protected TextView createTextView(String label){
@@ -248,7 +253,10 @@ public abstract class medi_mouse_activity extends Activity {
         //String webView = getString(R.string.help_about_html);
         //Log.d(TAG,webView);
         //myWebView.loadData(webView, "text/html", "utf-8");
-        myWebView.loadUrl("file:///android_asset/help_about.html");  
+        myWebView.loadUrl("file:///android_asset/help_about.html");
+        myWebView.addJavascriptInterface(new JSInterface(this), "Android");
+        WebSettings webSettings = myWebView.getSettings();
+		webSettings.setJavaScriptEnabled(true);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(alertDialogView);
        
@@ -308,5 +316,33 @@ public abstract class medi_mouse_activity extends Activity {
 		} catch (android.content.ActivityNotFoundException ex) {
 		    Toast.makeText(this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
 		}
+	}
+	class JSInterface {
+		static final String TAG = "jsconsole";
+	    Context mContext;
+	    String mPref;
+	    String mVal;
+	    /** Instantiate the interface and set the context 
+	     * @param prefname, String defaultValue */
+	    JSInterface(Context c) {
+	        mContext = c;
+	    }
+
+	    @JavascriptInterface
+	    public String getVersion() {
+	    	return medi_mouse_activity.this.getVersion();
+	    }
+	}
+	public String getVersion(){
+		PackageInfo pInfo;
+    	String version = "";
+		try {
+			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			version = pInfo.versionName;
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return version;
 	}
 }
