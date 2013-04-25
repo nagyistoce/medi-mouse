@@ -58,8 +58,9 @@ public class EditPreferences extends medi_mouse_activity {
 		usernameView.setText(username);
 		passwordView = createEditText();
 		passwordView.setText(password);
-		passwordView.setTransformationMethod(PasswordTransformationMethod.getInstance());
 		
+		passwordView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		passwordView.setTransformationMethod(PasswordTransformationMethod.getInstance());
 		View usernameLabel = createTextView("username");
 		View passwordLabel = createTextView("password");
 		
@@ -130,14 +131,12 @@ public class EditPreferences extends medi_mouse_activity {
 	private void commitChanges(){
 		username = usernameView.getText().toString();
 		password = passwordView.getText().toString();
-        SharedPreferences spref=PreferenceManager.getDefaultSharedPreferences(this);
+        
         Editor editor = spref.edit();
-        
-        
-    	editor.putString("user_name", username);
+        editor.putString("user_name", username);
     	editor.putString("user_password",password);
     	editor.commit();
-    	Log.d("EditPreferences","committing changes");
+    	Log.d("EditPreferences","committing changes: "+username+","+password);
 	}
 	@Override
 	public void onDetachedFromWindow(){

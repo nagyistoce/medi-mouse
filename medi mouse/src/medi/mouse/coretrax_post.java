@@ -28,7 +28,7 @@ public class coretrax_post
 	//private static String SITE= "http://localhost:9080/handler.html";
 	public static ClientConnectionManager CM=null;
 	private medi_mouse_activity context;
-	private static String USER_AGENT = "medi.mouse";
+	private String USER_AGENT = "medi.mouse";
 	BasicHttpContext mHttpContext;
 
 	public coretrax_post(medi_mouse_activity context){
@@ -55,7 +55,7 @@ public class coretrax_post
 		return new coretrax_resp(resp,arg0[0].pos);
 		
 	}
-	public static String makeRequest(String path, JSONObject params) {
+	public String makeRequest(String path, JSONObject params) {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost httpost = new HttpPost(path);
 		String error = "";
