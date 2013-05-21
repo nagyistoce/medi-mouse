@@ -1,22 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/MainFrame"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-   	<LinearLayout
-   		android:padding="15dip"
-   		android:id="@+id/MainLinearLayout"
-   		android:layout_width="fill_parent"
-   		android:layout_height="fill_parent"
-   		android:orientation="vertical" />
-    <LinearLayout 
-    	android:id="@+id/FloatingLayout"
-    	android:layout_gravity="center"
-    	android:gravity="center"/>
-    <LinearLayout 
-    	android:id="@+id/WhatsNew"
-    	android:layout_gravity="bottom"
-    	android:gravity="right"/>
-</FrameLayout>
+    android:layout_height="fill_parent">
+	<FrameLayout
+	    android:id="@+id/MainFrame"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical" >
+	
+	   	<LinearLayout
+	   		android:padding="15dip"
+	   		android:id="@+id/MainLinearLayout"
+	   		android:layout_width="fill_parent"
+	   		android:layout_height="fill_parent"
+	   		android:orientation="vertical" />
+	   	<LinearLayout
+	   		android:padding="15dip"
+	   		android:id="@+id/NotesLayout"
+	   		android:layout_width="fill_parent"
+	   		android:layout_height="fill_parent"
+	   		android:orientation="vertical" />
+	    <LinearLayout 
+	    	android:id="@+id/FloatingLayout"
+	    	android:layout_gravity="center"
+	    	android:gravity="center"/>
+	    <LinearLayout 
+	    	android:id="@+id/WhatsNew"
+	    	android:layout_gravity="bottom"
+	    	android:gravity="right"/>
+	</FrameLayout>
+</ScrollView>

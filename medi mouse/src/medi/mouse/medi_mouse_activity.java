@@ -1,5 +1,8 @@
 package medi.mouse;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import medi.mouse.EditPreferences.ColorInterface;
 
 import org.acra.ErrorReporter;
@@ -21,6 +24,7 @@ import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,8 +51,11 @@ public abstract class medi_mouse_activity extends Activity {
 	static final int SDK = android.os.Build.VERSION.SDK_INT;
 	SharedPreferences spref;
 	protected String text_color, background_color, box_color;
-	protected String username, password, full_name, status;
+	protected static String username, password; 
+	protected String full_name, status;
 	protected String menu;
+	protected String notes;
+	protected String new_notes;
 	
 	public abstract void onPostExecute(Object result);
 	@Override
@@ -57,6 +64,7 @@ public abstract class medi_mouse_activity extends Activity {
 		spref=PreferenceManager.getDefaultSharedPreferences(this);
 		username = spref.getString("user_name", "");
     	password = spref.getString("user_password","");
+    	notes = spref.getString("notes","");
     	full_name = spref.getString("full_name", "");
     	status = spref.getString("status", "");
     	text_color = spref.getString("text-color","000000");
@@ -208,6 +216,10 @@ public abstract class medi_mouse_activity extends Activity {
     	et.setBackgroundColor(0xFFFFFFFF);
     	return et;
     }
+    protected WebView createWebView(){
+    	WebView wv = new WebView(this);
+    	return wv;
+    }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         //super.onConfigurationChanged(newConfig);
@@ -231,7 +243,19 @@ public abstract class medi_mouse_activity extends Activity {
 	}
 	protected void WhatsNew(){
 		LinearLayout ll = (LinearLayout)findViewById(R.id.WhatsNew);
+		int val_high = 50;
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(val_high, val_high);
+	    android.widget.LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(val_high, val_high);
+	    android.widget.LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, 
+	        (int) TypedValue.applyDimension(
+	        TypedValue.COMPLEX_UNIT_DIP, 10, this.getResources().getDisplayMetrics()));
+
+	    
+	    
 		ImageView info = new ImageView(this);
+		
+		info.setMaxHeight(val_high);
+		info.setMaxWidth(val_high);
 		info.setVisibility(View.VISIBLE);
 		info.setBackgroundResource(R.drawable.info);
 		ll.addView(info);
@@ -243,6 +267,10 @@ public abstract class medi_mouse_activity extends Activity {
 			}
 			
 		});
+	    ll.updateViewLayout(info, layoutParams);  
+	    
+		
+		
 	}
 	private void HelpAbout(){
     	LayoutInflater inflater = LayoutInflater.from(this);
@@ -332,6 +360,33 @@ public abstract class medi_mouse_activity extends Activity {
 	    public String getVersion() {
 	    	return medi_mouse_activity.this.getVersion();
 	    }
+	    @JavascriptInterface
+	    public String getNotes() {
+	    	return medi_mouse_activity.this.notes;
+	    }
+	    @JavascriptInterface
+	    public void returnNotes(String notes) {
+	    	//do something with the new notes
+	    	medi_mouse_activity.this.new_notes = notes;
+	    	
+	    }
+	    @JavascriptInterface
+	    public void saveNotes(String notes) {
+	    	//do something with the new notes
+	    	medi_mouse_activity.this.new_notes = notes;
+	    	ArrayList<String> path = new ArrayList<String>();
+	    	path.add("Note");
+	    	HashMap<String,String> extra = new HashMap<String,String>();
+	    	extra.put("note_form_name",notes);
+	    	coretrax_args args = new coretrax_args("set_status",
+					username,
+					password,
+					path,
+					extra);
+	    	coretrax_post ctpost = new coretrax_post(medi_mouse_activity.this);
+			ctpost.execute(args);
+	    }
+	    
 	}
 	public String getVersion(){
 		PackageInfo pInfo;

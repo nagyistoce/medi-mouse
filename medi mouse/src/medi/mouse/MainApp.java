@@ -1,5 +1,7 @@
 package medi.mouse;
 
+import medi.mouse.medi_mouse_activity.JSInterface;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,6 +22,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,6 +35,9 @@ public class MainApp extends medi_mouse_activity implements OnSharedPreferenceCh
 	
 	private View mInfoView;
 	private float[] start_pos = new float[2];
+
+	private View mNotesView;
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(TAG,"SDK: "+SDK);
@@ -65,18 +72,28 @@ public class MainApp extends medi_mouse_activity implements OnSharedPreferenceCh
 		TableView.addView(refresh);
 		TableView.forceLayout();
 		MainView.addView(info);
+		
 		MainView.forceLayout();
 		MainView.invalidate();
 		//MainView.buildLayer();
 		
 	}
+	private View createNotesView() {
+		mNotesView = createBoxView();
+		refreshNotesView();
+		return mNotesView;
+	}
+
 	private View setupInfoView(){
 		mInfoView = createBoxView();
 		LinearLayout MainView = (LinearLayout) findViewById(R.id.MainLinearLayout);
 		refreshInfoView(mInfoView);
 		MainView.addView(mInfoView);
+		if(notes.length()>0){
+			createNotesView();
+			MainView.addView(mNotesView);
+		}
 		MainView.forceLayout();
-		
 		return mInfoView;
 		
 	}
@@ -92,7 +109,18 @@ public class MainApp extends medi_mouse_activity implements OnSharedPreferenceCh
 		TableView.addView(statusView);
 		info.invalidate();
 		
-		
+	}
+	private void refreshNotesView(){
+		TableLayout TableView = (TableLayout) mNotesView.findViewById(R.id.TableLayout);
+		TableView.removeAllViews();
+		WebView wv = createWebView();
+		wv.loadData(notes, "text/html", null);
+		wv.loadUrl("file:///android_asset/notes.html");
+        wv.addJavascriptInterface(new JSInterface(this), "Android");
+        WebSettings webSettings = wv.getSettings();
+		webSettings.setJavaScriptEnabled(true);
+		TableView.addView(wv);
+		mNotesView.invalidate();
 	}
 	private void refresh(){
 		//FloatingLayout
@@ -102,6 +130,10 @@ public class MainApp extends medi_mouse_activity implements OnSharedPreferenceCh
 		coretrax_args arg = new coretrax_args("get_status",username,password);
 		coretrax_post trax_post = new coretrax_post(this);
 		trax_post.execute(arg);
+		
+		//arg = new coretrax_args("get_notes",username,password);
+		//trax_post = new coretrax_post(this);
+		//trax_post.execute(arg);
 	}
 	private void setupRefreshButton(){
 		View info = createBoxView();
@@ -165,8 +197,18 @@ public class MainApp extends medi_mouse_activity implements OnSharedPreferenceCh
 					e.printStackTrace();
 				}
 			}
+			if(data.has("notes")){
+				try {
+					notes = data.getString("notes");
+					Log.d(TAG,"notes: "+notes);
+					editor.putString("notes", notes);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
 			editor.commit();
 			refreshInfoView(mInfoView);
+			refreshNotesView();
 		}
 	}
 
