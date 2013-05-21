@@ -3,7 +3,7 @@
     package="medi.mouse"
 
     android:versionCode="33"
-    android:versionName="2.2.1" >
+    android:versionName="2.2.2" >
 
     <uses-sdk android:targetSdkVersion="11"
    			  android:minSdkVersion="7"/>
