@@ -1,32 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-	<FrameLayout
-	    android:id="@+id/MainFrame"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="horizontal">
+	<ScrollView 
+	    android:layout_width="75dip"
+        android:layout_height="fill_parent">
+		<LinearLayout
+		    android:id="@+id/switcher"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:orientation="vertical">
+	        <Button
+		        android:id="@+id/in_out"
+		        android:text="@string/in_out"
+		        style="@style/menu_item"/>
+			<View style="@style/divider"/>
+			<Button
+		        android:id="@+id/schedule"
+		        android:text="@string/schedule"
+				style="@style/menu_item"/>
+			<View style="@style/divider"/>
+			<Button
+		        android:id="@+id/people"
+		        android:text="@string/people"
+		        style="@style/menu_item"/>
+			<View style="@style/divider"/>
+			<Button
+		        android:id="@+id/notes"
+		        android:text="@string/notes"
+		        style="@style/menu_item"/>
+			<View style="@style/divider" />
+			<Button
+		        android:id="@+id/logout"
+		        android:text="@string/logout"
+		        style="@style/menu_item"/>
+			<View style="@style/divider"/>
+			<Button
+		        android:id="@+id/help_about"
+		        android:text="@string/help_about"
+		        style="@style/menu_item"/>
+			<View style="@style/divider"/>"
+			
+		</LinearLayout>
+	</ScrollView>
+	<View style="@style/divider"
+	    android:layout_width="1dip"
+	    android:layout_height="match_parent"/>
+    <ScrollView 
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:orientation="vertical" >
+	    android:layout_height="fill_parent">
+		<LinearLayout
+		    android:id="@+id/main_content"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:orientation="vertical"/>
+	    
+	</ScrollView>
 	
-	   	<LinearLayout
-	   		android:padding="15dip"
-	   		android:id="@+id/MainLinearLayout"
-	   		android:layout_width="fill_parent"
-	   		android:layout_height="fill_parent"
-	   		android:orientation="vertical" />
-	   	<LinearLayout
-	   		android:padding="15dip"
-	   		android:id="@+id/NotesLayout"
-	   		android:layout_width="fill_parent"
-	   		android:layout_height="fill_parent"
-	   		android:orientation="vertical" />
-	    <LinearLayout 
-	    	android:id="@+id/FloatingLayout"
-	    	android:layout_gravity="center"
-	    	android:gravity="center"/>
-	    <LinearLayout 
-	    	android:id="@+id/WhatsNew"
-	    	android:layout_gravity="bottom"
-	    	android:gravity="right"/>
-	</FrameLayout>
-</ScrollView>
+</LinearLayout>

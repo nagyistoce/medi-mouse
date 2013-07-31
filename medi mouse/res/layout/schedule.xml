@@ -1,0 +1,21 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <Button
+	        android:id="@+id/refresh"
+	        style="@style/menu_item"
+	        android:text="@string/refresh"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"/>
+        <LinearLayout 
+	        android:id="@+id/event_list"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical"
+	        android:layout_margin="6dip"/>
+	</LinearLayout>
+</ScrollView>

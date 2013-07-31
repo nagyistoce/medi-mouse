@@ -4,7 +4,7 @@
 	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-17/android.jar"/>
 	<classpathentry kind="lib" path="C:/Users/will/android-sdks/platforms/android-15/android.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry kind="lib" path="C:/Users/will/git/medi mouse/medi mouse/libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/will/git/medi mouse/medi mouse/libs/android-support-v4.jar"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
@@ -25,5 +25,6 @@
 			<accessrule kind="nonaccessible" pattern="com/android/internal/**"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

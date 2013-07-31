@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fadingEdge="vertical"
+    
+    android:orientation="vertical"
+    android:scrollbarStyle="insideOverlay"
+    android:scrollbars="vertical" >
+
+	<LinearLayout  
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
+
+	    <DatePicker
+	        android:id="@+id/date_picker"
+	        style="@style/event_text_black"
+	        android:editTextStyle="@style/event_text_black"
+	        
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:calendarViewShown="true"
+	        android:spinnersShown="false"
+	        android:endYear="2200"
+	        android:startYear="2000" />
+
+    </LinearLayout>
+</LinearLayout>

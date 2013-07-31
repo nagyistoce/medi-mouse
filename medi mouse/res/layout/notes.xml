@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical"
+	android:layout_margin="6dip">
+	<Button
+        android:id="@+id/save"
+        style="@style/menu_item"
+        android:text="@string/save"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+	<EditText
+	    android:id="@+id/notes"
+	    style="@style/edit_text"
+	    android:inputType="textMultiLine" 
+	    android:lines="20"
+	    android:layout_height="wrap_content" 
+	    android:layout_width="fill_parent"
+	    android:scrollbars="vertical"/>
+</LinearLayout>

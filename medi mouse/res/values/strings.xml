@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="version_name">2.15</string>
-	<string name="version_number">27</string>
-	
+
     <string name="app_name">Medi Mouse</string>
     <string name="submit">Submit</string>
     <string name="crashing">Getting device info</string>
@@ -36,5 +34,26 @@ If you find a location that is incorrect you can tap it and vote it down and/or 
     <string name="error_message_bad_url">Error: Invalid URL!</string>
     <string name="error_message_file_not_found">Error: File not found!</string>
     <string name="error_message_general">Error downloading file!</string>
-
+    
+    
+    <string name="username">Username</string>
+	<string name="password">Password</string>
+	<string name="login">Login</string>
+	<string name="logo">Logo</string>
+	
+	<string name="in_out">In/Out</string>
+	<string name="schedule">Schedule</string>
+	<string name="people">People</string>
+	<string name="logout">Logout</string>
+	<string name="notes">Notes</string>
+	
+	<string name="refresh">Refresh</string>
+	
+	<string name="participants">Participants</string>
+	<string name="event_list">Event List</string>
+	
+	<string name="lookup">Lookup</string>
+	<string name="custom_divider">Quick Save</string>
+	
+	<string name="save">Save</string>
 </resources>
